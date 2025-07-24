@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Heart, ShoppingCart, User, Menu, Search, ChevronDown } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 const servicesMenu = [
   {
@@ -46,7 +47,14 @@ const helpMenu = [
 ]
 
 export default function Navbar() {
+  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
+  const handleLogout = () => {
+    setIsOpen(false)
+    router.push("/auth/login")
+    localStorage.clear()
+    console.log("User logged out")
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b shadow-sm">
@@ -166,7 +174,7 @@ export default function Navbar() {
                 <DropdownMenuItem asChild>
                   <Link href="/admin">Admin Panel</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
