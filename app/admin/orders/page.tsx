@@ -144,7 +144,7 @@ export default function OrdersPage() {
                       <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
                     </td>
                     <td className="py-3 px-4">{order.items}</td>
-                    <td className="py-3 px-4 font-medium">${order.total.toFixed(2)}</td>
+                    <td className="py-3 px-4 font-medium">₹{order.total.toFixed(2)}</td>
                     <td className="py-3 px-4 text-right">
                       <Dialog>
                         <DialogTrigger asChild>
@@ -190,7 +190,7 @@ export default function OrdersPage() {
                                 </div>
                                 <div>
                                   <Label className="text-sm font-medium">Total</Label>
-                                  <p className="text-lg font-bold">${selectedOrder.total.toFixed(2)}</p>
+                                  <p className="text-lg font-bold">₹{selectedOrder.total.toFixed(2)}</p>
                                 </div>
                               </div>
                             </div>

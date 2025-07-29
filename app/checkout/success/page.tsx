@@ -28,7 +28,7 @@ export default function CheckoutSuccessPage() {
                   Order Date: <span className="font-medium">{new Date().toLocaleDateString()}</span>
                 </p>
                 <p className="text-gray-600">
-                  Total Amount: <span className="font-medium">$109.97</span>
+                  Total Amount: <span className="font-medium">₹109.97</span>
                 </p>
               </div>
               <div>

@@ -312,9 +312,9 @@ export default function ProductsPage() {
                   </Link>
                   <p className="text-sm text-gray-500 mb-2">{product.brand}</p>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-lg font-bold text-green-600">${product.price}</span>
+                    <span className="text-lg font-bold text-green-600">₹{product.price}</span>
                     {product.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through">${product.originalPrice}</span>
+                      <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
                     )}
                   </div>
                   <div className="flex gap-2">

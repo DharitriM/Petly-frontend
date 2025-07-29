@@ -151,8 +151,8 @@ export default function CartPage() {
                       </div>
 
                       <div className="text-right">
-                        <p className="text-lg font-bold">${(item.price * item.quantity).toFixed(2)}</p>
-                        <p className="text-sm text-gray-500">${item.price.toFixed(2)} each</p>
+                        <p className="text-lg font-bold">₹{(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-sm text-gray-500">₹{item.price.toFixed(2)} each</p>
                       </div>
                     </div>
                   </div>
@@ -171,26 +171,26 @@ export default function CartPage() {
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between">
                   <span>Subtotal ({cartItems.length} items)</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>₹{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>
+                  <span>{shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>₹{tax.toFixed(2)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>₹{total.toFixed(2)}</span>
                 </div>
               </div>
 
               {shipping > 0 && (
                 <div className="bg-blue-50 p-3 rounded-lg mb-4">
-                  <p className="text-sm text-blue-800">Add ${(50 - subtotal).toFixed(2)} more for free shipping!</p>
+                  <p className="text-sm text-blue-800">Add ₹{(50 - subtotal).toFixed(2)} more for free shipping!</p>
                 </div>
               )}
 

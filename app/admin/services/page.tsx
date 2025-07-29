@@ -145,7 +145,7 @@ export default function ServicesPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price ($)</Label>
+                  <Label htmlFor="price">Price (₹)</Label>
                   <Input
                     id="price"
                     type="number"
@@ -219,7 +219,7 @@ export default function ServicesPage() {
                   <tr key={service.id} className="border-b hover:bg-gray-50">
                     <td className="py-3 px-4 font-medium">{service.name}</td>
                     <td className="py-3 px-4">{service.category}</td>
-                    <td className="py-3 px-4 font-medium">${service.price.toFixed(2)}</td>
+                    <td className="py-3 px-4 font-medium">₹{service.price.toFixed(2)}</td>
                     <td className="py-3 px-4">{formatDuration(service.duration)}</td>
                     <td className="py-3 px-4">{service.bookings}</td>
                     <td className="py-3 px-4">

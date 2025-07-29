@@ -169,13 +169,13 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-3xl font-bold text-green-600">${product.price}</span>
+            <span className="text-3xl font-bold text-green-600">₹{product.price}</span>
             {product.originalPrice && (
-              <span className="text-xl text-gray-500 line-through">${product.originalPrice}</span>
+              <span className="text-xl text-gray-500 line-through">₹{product.originalPrice}</span>
             )}
             {product.originalPrice && (
               <Badge className="bg-green-100 text-green-800">
-                Save ${(product.originalPrice - product.price).toFixed(2)}
+                Save ₹{(product.originalPrice - product.price).toFixed(2)}
               </Badge>
             )}
           </div>
@@ -246,7 +246,7 @@ export default function ProductDetailPage() {
             <div className="text-center">
               <Truck className="w-6 h-6 mx-auto mb-2 text-green-600" />
               <p className="text-sm font-medium">Free Shipping</p>
-              <p className="text-xs text-gray-500">On orders over $50</p>
+              <p className="text-xs text-gray-500">On orders over ₹50</p>
             </div>
             <div className="text-center">
               <Shield className="w-6 h-6 mx-auto mb-2 text-blue-600" />
@@ -378,7 +378,7 @@ export default function ProductDetailPage() {
                   <h3 className="font-semibold mb-2 hover:text-purple-600 cursor-pointer">{relatedProduct.name}</h3>
                 </Link>
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-green-600">${relatedProduct.price}</span>
+                  <span className="text-lg font-bold text-green-600">₹{relatedProduct.price}</span>
                   <Button size="sm" variant="outline">
                     <ShoppingCart className="w-4 h-4" />
                   </Button>

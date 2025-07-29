@@ -7,7 +7,7 @@ export default function AnalyticsPage() {
   const metrics = [
     {
       title: "Total Revenue",
-      value: "$128,450",
+      value: "₹128,450",
       change: "+18.2%",
       trend: "up",
       icon: DollarSign,
@@ -105,7 +105,7 @@ export default function AnalyticsPage() {
                     <p className="font-medium">{data.month}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold">${data.sales.toLocaleString()}</p>
+                    <p className="font-bold">₹{data.sales.toLocaleString()}</p>
                     <div className="w-24 h-2 bg-gray-200 rounded-full mt-1">
                       <div
                         className="h-2 bg-blue-500 rounded-full"
@@ -133,7 +133,7 @@ export default function AnalyticsPage() {
                     <p className="text-sm text-gray-600">{product.sales} sold</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold">${product.revenue.toLocaleString()}</p>
+                    <p className="font-bold">₹{product.revenue.toLocaleString()}</p>
                   </div>
                 </div>
               ))}

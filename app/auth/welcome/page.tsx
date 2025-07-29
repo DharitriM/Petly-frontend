@@ -102,7 +102,7 @@ export default function WelcomePage() {
           {/* <div className="mt-12 p-6 bg-purple-50 rounded-lg">
             <h4 className="font-semibold text-purple-800 mb-2">🎁 Welcome Bonus!</h4>
             <p className="text-purple-700 text-sm mb-4">
-              As a new member, you get 15% off your first order and free shipping on orders over $50.
+              As a new member, you get 15% off your first order and free shipping on orders over ₹50.
             </p>
             <Button variant="outline" className="bg-white text-purple-600 border-purple-200 hover:bg-purple-50">
               Claim Your Discount

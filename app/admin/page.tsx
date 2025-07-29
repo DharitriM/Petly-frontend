@@ -44,7 +44,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Revenue",
-      value: "$128,450",
+      value: "₹128,450",
       change: "+23%",
       icon: DollarSign,
       color: "text-orange-600",
@@ -56,25 +56,25 @@ export default function AdminDashboard() {
     {
       id: "ORD-001",
       customer: "John Doe",
-      amount: "$89.99",
+      amount: "₹89.99",
       status: "Delivered",
     },
     {
       id: "ORD-002",
       customer: "Jane Smith",
-      amount: "$45.50",
+      amount: "₹45.50",
       status: "Processing",
     },
     {
       id: "ORD-003",
       customer: "Bob Johnson",
-      amount: "$125.75",
+      amount: "₹125.75",
       status: "Shipped",
     },
     {
       id: "ORD-004",
       customer: "Alice Brown",
-      amount: "$67.25",
+      amount: "₹67.25",
       status: "Pending",
     },
   ];
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        router.push("/auth/login");
+        router.push("/auth/login/2");
         return;
       }
 
