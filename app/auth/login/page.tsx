@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,14 +23,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const searchParams = useSearchParams()
-
-    useEffect(() => {
-    const hasRedirectParams = searchParams.get("redirect") || searchParams.get("admin")
-    if (hasRedirectParams) {
-      router.replace("/auth/login") // removes query params
-    }
-  }, [searchParams, router])
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -85,8 +77,6 @@ export default function LoginPage() {
           localStorage.setItem("supabaseSession", JSON.stringify(data.session));
         }
 
-        // window.location.href = "/";
-
         const user = data.user;
         if (!user) {
           setErrors({ general: "Login failed: No user returned" });
@@ -108,10 +98,8 @@ export default function LoginPage() {
         localStorage.setItem("userProfile", JSON.stringify(profile));
         // ✅ Redirect based on admin status
         if (profile?.is_admin) {
-          // window.location.href = "/admin";
           router.push("/admin");
         } else {
-          // window.location.href = "/";
           router.push("/");
         }
       }
