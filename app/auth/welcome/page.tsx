@@ -13,11 +13,11 @@ export default function WelcomePage() {
           <div className="mb-8">
             <CheckCircle className="w-24 h-24 text-green-500 mx-auto mb-6" />
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Welcome to PetHome! 🎉
+              Welcome to PetLy! 🎉
             </h1>
             <p className="text-xl text-gray-600">
               Your account has been successfully created. You're now part of the
-              PetHome family!
+              PetLy family!
             </p>
           </div>
 
@@ -29,7 +29,7 @@ export default function WelcomePage() {
                   <span className="text-6xl mb-4 block">🐾</span>
                   <h2 className="text-2xl font-bold mb-4">You're all set!</h2>
                   <p className="text-gray-600">
-                    Thank you for joining PetHome. We're excited to help you
+                    Thank you for joining PetLy. We're excited to help you
                     provide the best care for your furry friends.
                   </p>
                 </div>

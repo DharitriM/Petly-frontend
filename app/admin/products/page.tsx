@@ -16,18 +16,19 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { petTypes, productCategories } from "@/lib/utils";
+import { RootState } from "@/store";
+import { useSelector, useDispatch } from "react-redux";
+import { setProducts } from "@/store/productSlice";
 
 const supabase = require("@/lib/supabaseClient").supabase;
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<any[]>([]);
+  const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-
   const [newProduct, setNewProduct] = useState({
     name: "",
     price: 0,
@@ -40,11 +41,14 @@ export default function ProductsPage() {
     in_stock: true,
     images: [] as string[],
   });
+  const products = useSelector((state: RootState) => state.product.products);
 
   useEffect(() => {
     const fetchProducts = async () => {
       const { data } = await supabase.from("products").select("*");
-      if (data) setProducts(data);
+      if (data) {
+        dispatch(setProducts(data));
+      }
     };
     fetchProducts();
   }, []);

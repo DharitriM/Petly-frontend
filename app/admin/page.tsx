@@ -7,7 +7,6 @@ import {
   Users,
   Package,
   ShoppingCart,
-  DollarSign,
   TrendingUp,
   Eye,
 } from "lucide-react";
@@ -15,42 +14,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { useDispatch, useSelector } from "react-redux";
+import { User } from "@/lib/interfaces/user";
+import { setUsers } from "@/store/userSlice";
+import { setProducts } from "@/store/productSlice";
 
 export default function AdminDashboard() {
-  const stats = [
-    {
-      title: "Total Users",
-      value: "2,847",
-      change: "+12%",
-      icon: Users,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
-    },
-    {
-      title: "Products",
-      value: "1,234",
-      change: "+5%",
-      icon: Package,
-      color: "text-green-600",
-      bg: "bg-green-50",
-    },
-    {
-      title: "Orders",
-      value: "1,379",
-      change: "+18%",
-      icon: ShoppingCart,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
-    },
-    {
-      title: "Revenue",
-      value: "₹128,450",
-      change: "+23%",
-      icon: DollarSign,
-      color: "text-orange-600",
-      bg: "bg-orange-50",
-    },
-  ];
+  const router = useRouter();
+  const dispatch = useDispatch();
 
   const recentOrders = [
     {
@@ -79,16 +50,57 @@ export default function AdminDashboard() {
     },
   ];
 
-  const recentUsers = [
-    { name: "Emily Davis", email: "emily@example.com", joined: "2 hours ago" },
+  const users = useSelector((state: any) => state.user.users);
+  const products = useSelector((state: any) => state.product.products);
+  const [recentUsers, setRecentUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+    const stats = [
     {
-      name: "Michael Wilson",
-      email: "michael@example.com",
-      joined: "5 hours ago",
+      title: "Total Users",
+      value: users?.length || 0,
+      change: "+10%",
+      icon: Users,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
     },
-    { name: "Sarah Connor", email: "sarah@example.com", joined: "1 day ago" },
-    { name: "Tom Anderson", email: "tom@example.com", joined: "2 days ago" },
+    {
+      title: "Products",
+      value: products?.length || 0,
+      change: "+5%",
+      icon: Package,
+      color: "text-green-600",
+      bg: "bg-green-50",
+    },
+    {
+      title: "Orders",
+      value: "1,379",
+      change: "+18%",
+      icon: ShoppingCart,
+      color: "text-purple-600",
+      bg: "bg-purple-50",
+    }
   ];
+
+  useEffect(() => {
+    async function fetchUsers() {
+      const { data, error } = await supabase.from("user_profiles").select("*");
+      if (!error) dispatch(setUsers(data));
+      else console.error("Error fetching users:", error.message);
+    }
+
+    async function fetchProducts() {
+      const { data, error } = await supabase.from("products").select("*");
+      if (!error) dispatch(setProducts(data));
+      else console.error("Error fetching products:", error.message);
+    }
+    fetchUsers();
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    users.length > 0 && setRecentUsers(users.slice(0, 5));
+  }, [users]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -104,9 +116,6 @@ export default function AdminDashboard() {
         return "bg-gray-100 text-gray-800";
     }
   };
-
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -126,11 +135,11 @@ export default function AdminDashboard() {
         .single();
 
       if (error || !profile?.is_admin) {
-        router.push("/"); // not admin
+        router.push("/");
         return;
       }
 
-      setLoading(false); // admin is verified
+      setLoading(false); 
     };
 
     checkAdmin();
@@ -154,7 +163,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {stats.map((stat, index) => (
           <Card key={index}>
             <CardContent className="p-6">
@@ -232,17 +241,20 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentUsers.map((user, index) => (
+              {recentUsers.map((user: User, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                 >
                   <div>
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-sm text-gray-600">{user.email}</p>
+                    <p className="font-medium">
+                      {user.first_name + " " + user.last_name}
+                    </p>
+                    <p className="text-sm text-gray-600">{user.phone}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-500">{user.joined}</p>
+                    <Badge className="bg-blue-500 text-white py-1">{user.is_admin ? "Admin / you" : "User"}</Badge>
+                    <p className="text-sm text-gray-500">{new Date(user.created_at).toLocaleDateString()}</p>
                   </div>
                 </div>
               ))}

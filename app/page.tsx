@@ -68,7 +68,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <Badge className="bg-white/20 text-white border-white/30">🐾 Welcome to PetHome</Badge>
+              <Badge className="bg-white/20 text-white border-white/30">🐾 Welcome to PetLy</Badge>
               <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
                 Everything Your Pet Needs, All in One Place
               </h1>

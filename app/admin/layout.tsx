@@ -1,15 +1,15 @@
-import type React from "react"
-import { AdminSidebar } from "@/components/layout/admin-sidebar"
+import type React from "react";
+import { AdminSidebar } from "@/components/layout/admin-sidebar";
 
 export default function AdminLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-[92vh] bg-gray-50">
       <AdminSidebar />
       <main className="flex-1 overflow-auto">{children}</main>
     </div>
-  )
+  );
 }

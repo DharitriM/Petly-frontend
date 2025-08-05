@@ -12,7 +12,7 @@ import { Save } from "lucide-react"
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
-    siteName: "PetHome",
+    siteName: "PetLy",
     siteDescription: "Your one-stop shop for all pet needs",
     contactEmail: "admin@pethome.com",
     supportPhone: "+1 (555) 123-4567",

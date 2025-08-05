@@ -13,17 +13,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteUser, setUsers, updateUser } from "@/store/userSlice";
+import { User } from "@/lib/interfaces/user";
 
 const supabase = require("@/lib/supabaseClient").supabase;
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
   const [newUser, setNewUser] = useState({
     first_name: "",
     last_name: "",
@@ -32,6 +33,7 @@ export default function UsersPage() {
     has_pets: "",
     is_admin: false,
   });
+  const users = useSelector((state: any) => state.user.users);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -39,7 +41,7 @@ export default function UsersPage() {
       setCurrentUserId(user?.data?.user?.id);
 
       const { data, error } = await supabase.from("user_profiles").select("*");
-      if (!error) setUsers(data);
+      if (!error) dispatch(setUsers(data));
       else console.error("Error fetching users:", error.message);
     }
     fetchUsers();
@@ -53,7 +55,7 @@ export default function UsersPage() {
       .select();
 
     if (!error && data) {
-      setUsers(users.map((u) => (u.id === selectedUser.id ? data[0] : u)));
+       dispatch(updateUser(data[0]));
       resetForm();
     } else {
       console.error("Failed to update user:", error?.message);
@@ -63,7 +65,7 @@ export default function UsersPage() {
   const handleDeleteUser = async (id: string) => {
     const { error } = await supabase.from("user_profiles").delete().eq("id", id);
     if (!error) {
-      setUsers(users.filter((u) => u.id !== id));
+      dispatch(deleteUser(id));
     } else {
       console.error("Failed to delete user:", error?.message);
     }
@@ -79,16 +81,15 @@ export default function UsersPage() {
       is_admin: false,
     });
     setDialogOpen(false);
-    setIsEditing(false);
     setSelectedUser(null);
   };
 
-  const filteredUsers = users.filter(
-    (u) =>
+  const filteredUsers = users?.length > 0 && users.filter(
+    (u: User) =>
       u.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       u.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       u.phone?.includes(searchTerm)
-  );
+  ) || [];
 
   return (
     <div className="p-6">
@@ -126,7 +127,7 @@ export default function UsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
+                {filteredUsers?.length > 0 ? filteredUsers.map((user: User) => (
                   <tr key={user.id} className="border-b hover:bg-gray-50">
                     <td className="py-3 px-4 font-medium">{user.first_name}</td>
                     <td className="py-3 px-4 font-medium">{user.last_name}</td>
@@ -184,7 +185,6 @@ export default function UsersPage() {
                           size="sm"
                           variant="ghost"
                           onClick={() => {
-                            setIsEditing(true);
                             setSelectedUser(user);
                             setNewUser(user);
                             setDialogOpen(true);
@@ -203,7 +203,13 @@ export default function UsersPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan={7} className="py-3 px-4 text-center">
+                      No users found
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

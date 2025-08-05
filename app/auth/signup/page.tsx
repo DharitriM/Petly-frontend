@@ -284,10 +284,10 @@ export default function SignupPage() {
               <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-xl">🐾</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900">PetHome</span>
+              <span className="text-2xl font-bold text-gray-900">PetLy</span>
             </Link>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Join PetHome
+              Join PetLy
             </h1>
             <p className="text-gray-600">Create your account to get started</p>
           </div>
