@@ -106,10 +106,10 @@ export default function Navbar() {
                 </DropdownMenuTrigger>
                 
                 <DropdownMenuContent side="bottom" align="end" sideOffset={8} className="w-30 text-center">
-                  <DropdownMenuItem asChild className="justify-center">
+                  <DropdownMenuItem asChild className="justify-center w-full cursor-pointer hover:bg-gray-100">
                     <button onClick={() => router.push("/admin/profile")}>Profile</button>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="justify-center">
+                  <DropdownMenuItem asChild className="justify-center w-full cursor-pointer hover:bg-gray-100">
                     <button onClick={handleLogout}>Logout</button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
