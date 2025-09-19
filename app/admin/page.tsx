@@ -16,8 +16,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useDispatch, useSelector } from "react-redux";
 import { User } from "@/lib/interfaces/user";
-import { setUsers } from "@/store/userSlice";
-import { setProducts } from "@/store/productSlice";
+import { setUsers } from "@/store/slices/userSlice";
+import { setProducts } from "@/store/slices/productSlice";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
     }
 
     async function fetchProducts() {
-      const { data, error } = await supabase.from("products").select("*");
+      const { data, error } = await supabase.from("product_list").select("*");
       if (!error) dispatch(setProducts(data));
       else console.error("Error fetching products:", error.message);
     }

@@ -1,54 +1,23 @@
-"use client"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Heart, ShoppingCart, Star, Truck, Shield, Headphones } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-
-const featuredProducts = [
-  {
-    id: 1,
-    name: "Premium Dog Toy Set",
-    price: 29.99,
-    originalPrice: 39.99,
-    rating: 4.8,
-    reviews: 124,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Toys",
-    badge: "Best Seller",
-  },
-  {
-    id: 2,
-    name: "Cozy Pet Bed",
-    price: 49.99,
-    rating: 4.9,
-    reviews: 89,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Home",
-    badge: "New",
-  },
-  {
-    id: 3,
-    name: "Organic Pet Food",
-    price: 24.99,
-    rating: 4.7,
-    reviews: 156,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Food",
-    badge: "Organic",
-  },
-  {
-    id: 4,
-    name: "Stylish Pet Collar",
-    price: 19.99,
-    rating: 4.6,
-    reviews: 78,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Accessories",
-  },
-]
+"use client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Heart,
+  ShoppingCart,
+  Star,
+  Truck,
+  Shield,
+  Headphones,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { setProducts } from "@/store/slices/productSlice";
+import { Product } from "@/lib/interfaces/product";
 
 const categories = [
   { name: "Toys", icon: "🎾", count: "120+ items" },
@@ -57,10 +26,36 @@ const categories = [
   { name: "Home", icon: "🏠", count: "60+ items" },
   { name: "Health", icon: "💊", count: "45+ items" },
   { name: "Grooming", icon: "🛁", count: "35+ items" },
-]
+];
 
 export default function HomePage() {
-  const router = useRouter()
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  const products = useSelector((state: any) => state.product.products);
+  const searchTerm = useSelector((state: any) => state.search.searchTerm);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data } = await supabase.from("product_list").select("*");
+      if (data) {
+        dispatch(setProducts(data));
+      }
+    };
+    fetchProducts();
+  }, []);
+  console.log("Products from HomePage:", products);
+
+  const featuredProducts =
+    products?.length > 0 && searchTerm
+      ? products.filter(
+          (product: Product) =>
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.brand.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      : products.slice(0, 4);
+  console.log({ products, featuredProducts });
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -68,16 +63,21 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <Badge className="bg-white/20 text-white border-white/30">🐾 Welcome to PetLy</Badge>
+              <Badge className="p-2 align-middle font-mono text-xl bg-white/20 text-white border-white/30 hover:bg-pink-200 hover:text-purple-800 border-2">
+                🐾Welcome to PetLy
+              </Badge>
               <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
                 Everything Your Pet Needs, All in One Place
               </h1>
               <p className="text-xl opacity-90">
-                From premium food to cozy beds, toys to healthcare - discover the best products and services for your
-                furry friends.
+                From premium food to cozy beds, toys to healthcare - discover
+                the best products and services for your furry friends.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100">
+                <Button
+                  size="lg"
+                  className="bg-white text-purple-600 hover:bg-gray-100"
+                >
                   Shop Now
                 </Button>
                 <Button
@@ -147,7 +147,9 @@ export default function HomePage() {
                 <Headphones className="w-8 h-8 text-purple-600" />
               </div>
               <h3 className="text-xl font-semibold">24/7 Support</h3>
-              <p className="text-gray-600">Always here to help you and your pet</p>
+              <p className="text-gray-600">
+                Always here to help you and your pet
+              </p>
             </div>
           </div>
         </div>
@@ -158,14 +160,19 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Shop by Category</h2>
-            <p className="text-gray-600">Find exactly what your pet needs</p>
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">Find exactly what your pet needs</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {categories.map((category, index) => (
-              <Link key={index} href={`/products?category=${category.name.toLowerCase()}`}>
+              <Link
+                key={index}
+                href={`/products?category=${category.name.toLowerCase()}`}
+              >
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
                   <CardContent className="p-6 text-center">
-                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{category.icon}</div>
+                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
+                      {category.icon}
+                    </div>
                     <h3 className="font-semibold mb-1">{category.name}</h3>
                     <p className="text-sm text-gray-500">{category.count}</p>
                   </CardContent>
@@ -181,59 +188,93 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Featured Products</h2>
-            <p className="text-gray-600">Handpicked favorites for your furry friends</p>
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
+              Handpicked favorites for your furry friends
+            </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <Card key={product.id} className="group hover:shadow-xl transition-shadow">
-                <div className="relative overflow-hidden">
-                  <Image
-                    src={product.image || "/placeholder.svg"}
-                    alt={product.name}
-                    width={300}
-                    height={300}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                  />
-                  {product.badge && <Badge className="absolute top-2 left-2 bg-red-500">{product.badge}</Badge>}
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="secondary" className="rounded-full p-2">
-                      <Heart className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-1 mb-2">
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < Math.floor(product.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                          }`}
-                        />
-                      ))}
+          <div
+            // className={`${
+            //   featuredProducts?.length > 3
+            //     ? "grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            //     : "flex justify-center gap-6 flex-wrap"
+            // }`}
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            {featuredProducts?.length > 0 ? (
+              featuredProducts.map((product: Product) => (
+                <Card
+                  key={product.id}
+                  className="group hover:shadow-xl transition-shadow"
+                >
+                  <div className="relative overflow-hidden">
+                    <Image
+                      src={product?.images?.length > 0 ? product.images[0] : "/placeholder.svg"}
+                      alt={product.name}
+                      width={300}
+                      height={300}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                    />
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="rounded-full p-2"
+                      >
+                        <Heart className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <span className="text-sm text-gray-500">({product.reviews})</span>
                   </div>
-                  <h3 className="font-semibold mb-2">{product.name}</h3>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-lg font-bold text-green-600">₹{product.price}</span>
-                    {product.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button className="flex-1" size="sm">
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Add to Cart
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-1 mb-2">
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < Math.floor(product.rating)
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        ({product.reviews})
+                      </span>
+                    </div>
+                    <h3 className="font-semibold mb-2">{product.name}</h3>
+                    <h5 className="mb-2 text-gray-600">{product.brand}</h5>
+                    <p className="text-sm text-gray-600">description</p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-lg font-bold text-green-600">
+                        ₹{product.price}
+                      </span>
+                      {product.original_price && (
+                        <span className="text-sm text-gray-500 line-through">
+                          ₹{product.original_price}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button className="flex-1" size="sm">
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Add to Cart
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <p className="text-gray-600 text-center">No products found 😞.</p>
+            )}
           </div>
           <div className="text-center mt-8">
-            <Button size="lg" variant="outline" onClick={()=> router.push("/products")} className="border-purple-600 text-purple-600 hover:bg-purple-50">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => router.push("/products")}
+              className="border-purple-600 text-purple-600 hover:bg-purple-50"
+            >
               View All Products
             </Button>
           </div>
@@ -253,14 +294,18 @@ export default function HomePage() {
                 <span className="text-2xl">🏥</span>
               </div>
               <h3 className="font-semibold mb-2">Emergency Care</h3>
-              <p className="text-sm text-gray-600">24/7 veterinary emergency services</p>
+              <p className="text-sm text-gray-600">
+                24/7 veterinary emergency services
+              </p>
             </Card>
             <Card className="text-center p-6 hover:shadow-lg transition-shadow">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🍽️</span>
               </div>
               <h3 className="font-semibold mb-2">Diet Planning</h3>
-              <p className="text-sm text-gray-600">Customized nutrition plans</p>
+              <p className="text-sm text-gray-600">
+                Customized nutrition plans
+              </p>
             </Card>
             <Card className="text-center p-6 hover:shadow-lg transition-shadow">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -274,7 +319,9 @@ export default function HomePage() {
                 <span className="text-2xl">🛁</span>
               </div>
               <h3 className="font-semibold mb-2">Grooming</h3>
-              <p className="text-sm text-gray-600">Professional grooming services</p>
+              <p className="text-sm text-gray-600">
+                Professional grooming services
+              </p>
             </Card>
           </div>
         </div>
@@ -284,13 +331,21 @@ export default function HomePage() {
       <section className="py-16 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
-          <p className="text-xl mb-8 opacity-90">Get the latest pet care tips, product updates, and exclusive offers</p>
-          <div className="max-w-md mx-auto flex gap-4">
-            <input type="email" placeholder="Enter your email" className="flex-1 px-4 py-3 rounded-lg text-gray-900" />
-            <Button className="bg-white text-purple-600 hover:bg-gray-100">Subscribe</Button>
+          <p className="text-xl mb-8 opacity-80">
+            Get the latest pet care tips, product updates, and exclusive offers
+          </p>
+          <div className="max-w-md mx-auto flex gap-4 items-center">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="flex-1 px-4 py-2 rounded-lg text-gray-900"
+            />
+            <Button className="bg-white text-purple-600 hover:bg-gray-100">
+              Subscribe
+            </Button>
           </div>
         </div>
       </section>
     </div>
-  )
+  );
 }

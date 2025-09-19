@@ -18,8 +18,12 @@ import {
   Menu,
   Search,
   ChevronDown,
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Input } from "../ui/input";
+import { useDispatch } from "react-redux";
+import { setSearchTerm } from "@/store/slices/searchSlice";
 
 const servicesMenu = [
   {
@@ -68,14 +72,22 @@ const helpMenu = [
 
 export default function Navbar() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [search, setSearch] = useState("");
 
   const handleLogout = () => {
     setIsOpen(false);
     router.push("/auth/login");
     localStorage.clear();
     console.log("User logged out");
+  };
+
+  const handleSearch = () => {
+    if (search === "") return;
+    dispatch(setSearchTerm(search.trim()));
   };
 
   useEffect(() => {
@@ -96,20 +108,35 @@ export default function Navbar() {
               <div className="w-10 h-10 bg-gradient-to-r from-indigo-300 to-pink-300 rounded-full flex items-center justify-center">
                 <span className="font-bold text-lg">🐾</span>
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">PetLy Admin</span>
+              <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">
+                PetLy Admin
+              </span>
             </div>
             <div className="flex flex-end items-center hover:text-purple-600 transition-colors">
               <h2>Hello Admin</h2>
-               <DropdownMenu> 
+              <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center text-gray-700 hover:text-purple-600 transition-colors">
                   <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
-                
-                <DropdownMenuContent side="bottom" align="end" sideOffset={8} className="w-30 text-center">
-                  <DropdownMenuItem asChild className="justify-center w-full cursor-pointer hover:bg-gray-100">
-                    <button onClick={() => router.push("/admin/profile")}>Profile</button>
+
+                <DropdownMenuContent
+                  side="bottom"
+                  align="end"
+                  sideOffset={8}
+                  className="w-30 text-center"
+                >
+                  <DropdownMenuItem
+                    asChild
+                    className="justify-center w-full cursor-pointer hover:bg-gray-100"
+                  >
+                    <button onClick={() => router.push("/admin/profile")}>
+                      Profile
+                    </button>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="justify-center w-full cursor-pointer hover:bg-gray-100">
+                  <DropdownMenuItem
+                    asChild
+                    className="justify-center w-full cursor-pointer hover:bg-gray-100"
+                  >
                     <button onClick={handleLogout}>Logout</button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -122,9 +149,9 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-[7.8vh]">
             <Link href="/" className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">🐾</span>
+                <span className="font-bold text-lg">🐾</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">PetLy</span>
+              <span className="text-xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">PetLy</span>
             </Link>
             <div className="hidden lg:flex items-center space-x-8">
               <Link
@@ -202,9 +229,37 @@ export default function Navbar() {
 
             {/* Right Side Icons */}
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" className="hidden md:flex">
-                <Search className="h-4 w-4" />
-              </Button>
+              <div className="relative">
+                {!showSearch ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hidden md:flex"
+                    onClick={() => setShowSearch(true)}
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Search product..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                      className="w-[200px] md:w-[300px]"
+                      autoFocus
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowSearch(false)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
 
               <Link href="/wishlist">
                 <Button variant="ghost" size="sm" className="relative">

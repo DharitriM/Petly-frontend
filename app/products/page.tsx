@@ -3,92 +3,14 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Heart, ShoppingCart, Star, Filter, Search } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-
-const products = [
-  {
-    id: 1,
-    name: "Premium Dog Toy Set",
-    price: 29.99,
-    originalPrice: 39.99,
-    rating: 4.8,
-    reviews: 124,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "toys",
-    petType: "dog",
-    brand: "PetPlay",
-    inStock: true,
-    badge: "Best Seller",
-  },
-  {
-    id: 2,
-    name: "Cozy Cat Bed",
-    price: 49.99,
-    rating: 4.9,
-    reviews: 89,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "home",
-    petType: "cat",
-    brand: "ComfyPet",
-    inStock: true,
-    badge: "New",
-  },
-  {
-    id: 3,
-    name: "Organic Dog Food",
-    price: 24.99,
-    rating: 4.7,
-    reviews: 156,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "food",
-    petType: "dog",
-    brand: "NaturalPet",
-    inStock: true,
-    badge: "Organic",
-  },
-  {
-    id: 4,
-    name: "Stylish Dog Collar",
-    price: 19.99,
-    rating: 4.6,
-    reviews: 78,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "accessories",
-    petType: "dog",
-    brand: "FashionPet",
-    inStock: false,
-  },
-  {
-    id: 5,
-    name: "Cat Scratching Post",
-    price: 39.99,
-    rating: 4.5,
-    reviews: 92,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "toys",
-    petType: "cat",
-    brand: "CatFun",
-    inStock: true,
-  },
-  {
-    id: 6,
-    name: "Pet Shampoo",
-    price: 15.99,
-    rating: 4.4,
-    reviews: 67,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "grooming",
-    petType: "both",
-    brand: "CleanPet",
-    inStock: true,
-  },
-]
+import { RootState } from "@/store"
+import { useSelector } from "react-redux"
 
 const categories = [
   { id: "toys", name: "Toys", count: 45 },
@@ -122,15 +44,17 @@ export default function ProductsPage() {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [sortBy, setSortBy] = useState("featured")
   const [showFilters, setShowFilters] = useState(false)
+  const products = useSelector((state: RootState) => state.product.products)
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = !selectedCategory || product.category === selectedCategory
-    const matchesPetType = !selectedPetType || product.petType === selectedPetType || product.petType === "both"
     const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brand.toLowerCase())
-
-    return matchesSearch && matchesCategory && matchesPetType && matchesBrand
+    const matchesPetType = !selectedPetType || product.pet_type === selectedPetType
+    return matchesSearch && matchesCategory && matchesBrand && matchesPetType
   })
+
+  console.log("in products page:", { products})
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
@@ -141,7 +65,7 @@ export default function ProductsPage() {
       case "rating":
         return b.rating - a.rating
       case "newest":
-        return b.id - a.id
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       default:
         return 0
     }
@@ -278,15 +202,14 @@ export default function ProductsPage() {
                 <div className="relative overflow-hidden">
                   <Link href={`/products/${product.id}`}>
                     <Image
-                      src={product.image || "/placeholder.svg"}
+                      src={product?.images?.length > 0 ? product.images[0] : "/placeholder.svg"}
                       alt={product.name}
                       width={300}
                       height={300}
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform cursor-pointer"
                     />
                   </Link>
-                  {product.badge && <Badge className="absolute top-2 left-2 bg-red-500">{product.badge}</Badge>}
-                  {!product.inStock && <Badge className="absolute top-2 right-2 bg-gray-500">Out of Stock</Badge>}
+                  {/* {!product.inStock && <Badge className="absolute top-2 right-2 bg-gray-500">Out of Stock</Badge>} */}
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button size="sm" variant="secondary" className="rounded-full p-2">
                       <Heart className="w-4 h-4" />
@@ -313,15 +236,15 @@ export default function ProductsPage() {
                   <p className="text-sm text-gray-500 mb-2">{product.brand}</p>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-lg font-bold text-green-600">₹{product.price}</span>
-                    {product.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
+                    {product.original_price && (
+                      <span className="text-sm text-gray-500 line-through">₹{product.original_price}</span>
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <Button className="flex-1" size="sm" disabled={!product.inStock}>
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      {product.inStock ? "Add to Cart" : "Out of Stock"}
-                    </Button>
+                    {/* <Button className="flex-1" size="sm" disabled={!product.inStock}> */}
+                      <ShoppingCart className="w-4 h-4 mr-2" />Add to Cart
+                      {/* {product.inStock ? "Add to Cart" : "Out of Stock"} */}
+                    {/* </Button> */}
                   </div>
                 </CardContent>
               </Card>

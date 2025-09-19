@@ -115,7 +115,7 @@ export default function ProductDetailPage() {
         <div className="space-y-4">
           <div className="relative overflow-hidden rounded-lg">
             <Image
-              src={product.images[selectedImage] || "/placeholder.svg"}
+              src={product?.images?.length > 0 ? product.images[selectedImage] : "/placeholder.svg"}
               alt={product.name}
               width={500}
               height={500}
@@ -124,7 +124,7 @@ export default function ProductDetailPage() {
             {product.badge && <Badge className="absolute top-4 left-4 bg-red-500">{product.badge}</Badge>}
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {product.images.map((image, index) => (
+            {product?.images.map((image, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedImage(index)}

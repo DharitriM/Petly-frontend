@@ -19,6 +19,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Wrench,
+  Type,
+  Blocks,
+  SwatchBook,
+  PawPrint,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -47,6 +51,21 @@ const sidebarItems = [
     title: "Orders",
     href: "/admin/orders",
     icon: ShoppingCart,
+  },
+  {
+    title: "Categories",
+    href: "/admin/categories",
+    icon: Blocks,
+  },
+  {
+    title: "Brands",
+    href: "/admin/brands",
+    icon: SwatchBook,
+  },
+  {
+    title: "Pet Types",
+    href: "/admin/pet-types",
+    icon: PawPrint,
   },
   // {
   //   title: "Services",
@@ -145,13 +164,12 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
         <Button
           variant="ghost"
           className={cn(
-            "w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50",
-            collapsed ? "px-2" : "px-3"
+            "w-full justify-center text-red-600 hover:text-red-700 hover:bg-red-50",
           )}
           onClick={handleLogout}
         >
-          <LogOut className="w-4 h-4" />
-          {!collapsed && <span className="ml-3">Logout</span>}
+          <LogOut />
+          {!collapsed && <span>Logout</span>}
         </Button>
       </div>
     </div>

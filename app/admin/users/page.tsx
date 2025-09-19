@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteUser, setUsers, updateUser } from "@/store/userSlice";
+import { deleteUser, setUsers, updateUser } from "@/store/slices/userSlice";
 import { User } from "@/lib/interfaces/user";
 
 const supabase = require("@/lib/supabaseClient").supabase;

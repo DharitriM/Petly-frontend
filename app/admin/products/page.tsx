@@ -15,10 +15,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { petTypes, productCategories } from "@/lib/utils";
 import { RootState } from "@/store";
 import { useSelector, useDispatch } from "react-redux";
-import { setProducts } from "@/store/productSlice";
+import { setProducts } from "@/store/slices/productSlice";
 
 const supabase = require("@/lib/supabaseClient").supabase;
 
@@ -31,27 +30,31 @@ export default function ProductsPage() {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [newProduct, setNewProduct] = useState({
     name: "",
+    description: "",
     price: 0,
     original_price: 0,
+    weight: 0,
+    dimensions: "",
     rating: 0,
-    reviews: 0,
-    category: "",
-    pet_type: "",
-    brand: "",
-    in_stock: true,
+    reviews_count: 0,
+    quantity: 0,
     images: [] as string[],
+    category_id: "",
+    brand_id: "",
+    pet_type_id: "",
   });
   const products = useSelector((state: RootState) => state.product.products);
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data } = await supabase.from("products").select("*");
-      if (data) {
-        dispatch(setProducts(data));
+      const res = await fetch("/api/products");
+      const data = await res.json();
+      if (data.products) {
+        dispatch(setProducts(data.products));
       }
     };
     fetchProducts();
-  }, []);
+  }, [dispatch]);
 
   const uploadImages = async () => {
     const urls: string[] = [];
@@ -74,65 +77,72 @@ export default function ProductsPage() {
   };
 
   const handleAddProduct = async () => {
-    const user = await supabase.auth.getUser();
     const imageUrls = await uploadImages();
-    const { data, error } = await supabase
-      .from("products")
-      .insert([
-        {
-          ...newProduct,
-          price: Number(newProduct.price),
-          original_price: Number(newProduct.original_price),
-          rating: Number(newProduct.rating),
-          reviews: Number(newProduct.reviews),
-          images: imageUrls,
-          created_by: user.data.user?.id,
-        },
-      ])
-      .select();
 
-    if (!error && data) {
-      setProducts([...products, ...data]);
+    const res = await fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...newProduct,
+        price: Number(newProduct.price),
+        original_price: Number(newProduct.original_price),
+        weight: Number(newProduct.weight),
+        quantity: Number(newProduct.quantity),
+        images: imageUrls,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.product) {
+      dispatch(setProducts([...products, data.product]));
       resetForm();
-    } else {
-      console.error("Failed to insert product:", error?.message);
     }
   };
 
   const handleEditProduct = async () => {
     if (!selectedProduct) return;
+
     const imageUrls = await uploadImages();
-    const { data, error } = await supabase
-      .from("products")
-      .update({
+    const res = await fetch(`/api/products/${selectedProduct.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         ...newProduct,
         images: imageUrls.length > 0 ? imageUrls : newProduct.images,
-      })
-      .eq("id", selectedProduct.id)
-      .select();
+      }),
+    });
 
-    if (!error && data) {
-      setProducts(
-        products.map((p) => (p.id === selectedProduct.id ? data[0] : p))
+    const data = await res.json();
+    if (data.product) {
+      dispatch(
+        setProducts(
+          products.map((p) => (p.id === selectedProduct.id ? data.product : p))
+        )
       );
       resetForm();
-    } else {
-      console.error("Failed to update product:", error?.message);
     }
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    await fetch(`/api/products/${id}`, { method: "DELETE" });
+    dispatch(setProducts(products.filter((p) => p.id !== id)));
   };
 
   const resetForm = () => {
     setNewProduct({
       name: "",
+      description: "",
       price: 0,
       original_price: 0,
+      weight: 0,
+      dimensions: "",
       rating: 0,
-      reviews: 0,
-      category: "Food",
-      pet_type: "Dog",
-      brand: "",
-      in_stock: true,
+      reviews_count: 0,
+      quantity: 0,
       images: [],
+      category_id: "",
+      brand_id: "",
+      pet_type_id: "",
     });
     setImageFiles([]);
     setDialogOpen(false);
@@ -140,15 +150,11 @@ export default function ProductsPage() {
     setSelectedProduct(null);
   };
 
-  const handleDeleteProduct = async (id: string) => {
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (!error) setProducts(products.filter((product) => product.id !== id));
-  };
-
   const filteredProducts = products.filter(
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.brand.toLowerCase().includes(searchTerm.toLowerCase())
+      product.brand.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -176,6 +182,7 @@ export default function ProductsPage() {
                 {isEditing ? "Edit Product" : "Add New Product"}
               </DialogTitle>
             </DialogHeader>
+            {/* Form fields */}
             <div className="grid grid-cols-2 gap-4 py-4">
               <InputField
                 label="Product Name"
@@ -185,10 +192,10 @@ export default function ProductsPage() {
                 }
               />
               <InputField
-                label="Brand"
-                value={newProduct.brand}
+                label="Description"
+                value={newProduct.description}
                 onChange={(e: any) =>
-                  setNewProduct({ ...newProduct, brand: e.target.value })
+                  setNewProduct({ ...newProduct, description: e.target.value })
                 }
               />
               <InputField
@@ -196,10 +203,7 @@ export default function ProductsPage() {
                 type="number"
                 value={newProduct.price}
                 onChange={(e: any) =>
-                  setNewProduct({
-                    ...newProduct,
-                    price: parseFloat(e.target.value),
-                  })
+                  setNewProduct({ ...newProduct, price: e.target.value })
                 }
               />
               <InputField
@@ -207,47 +211,58 @@ export default function ProductsPage() {
                 type="number"
                 value={newProduct.original_price}
                 onChange={(e: any) =>
-                  setNewProduct({
-                    ...newProduct,
-                    original_price: parseFloat(e.target.value),
-                  })
+                  setNewProduct({ ...newProduct, original_price: e.target.value })
                 }
               />
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <select
-                  className="border rounded px-3 py-2 w-full"
-                  value={newProduct.category}
-                  onChange={(e) =>
-                    setNewProduct({ ...newProduct, category: e.target.value })
-                  }
-                >
-                  <option value="">Select Category</option>
-                  {productCategories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <InputField
+                label="Weight"
+                type="number"
+                value={newProduct.weight}
+                onChange={(e: any) =>
+                  setNewProduct({ ...newProduct, weight: e.target.value })
+                }
+              />
+              <InputField
+                label="Dimensions"
+                value={newProduct.dimensions}
+                onChange={(e: any) =>
+                  setNewProduct({ ...newProduct, dimensions: e.target.value })
+                }
+              />
+              <InputField
+                label="Stock Quantity"
+                type="number"
+                value={newProduct.quantity}
+                onChange={(e: any) =>
+                  setNewProduct({ ...newProduct, quantity: e.target.value })
+                }
+              />
 
-              <div className="space-y-2">
-                <Label>Pet Type</Label>
-                <select
-                  className="border rounded px-3 py-2 w-full"
-                  value={newProduct.pet_type}
-                  onChange={(e) =>
-                    setNewProduct({ ...newProduct, pet_type: e.target.value })
-                  }
-                >
-                  <option value="">Select Pet Type</option>
-                  {petTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Category, Brand, Pet Type will be dropdowns */}
+              <DropdownField
+                label="Category"
+                value={newProduct.category_id}
+                onChange={(e: any) =>
+                  setNewProduct({ ...newProduct, category_id: e.target.value })
+                }
+                endpoint="/api/categories"
+              />
+              <DropdownField
+                label="Brand"
+                value={newProduct.brand_id}
+                onChange={(e: any) =>
+                  setNewProduct({ ...newProduct, brand_id: e.target.value })
+                }
+                endpoint="/api/brands"
+              />
+              <DropdownField
+                label="Pet Type"
+                value={newProduct.pet_type_id}
+                onChange={(e: any) =>
+                  setNewProduct({ ...newProduct, pet_type_id: e.target.value })
+                }
+                endpoint="/api/pet-types"
+              />
 
               <div className="col-span-2 space-y-2">
                 <Label>Upload Images</Label>
@@ -255,19 +270,17 @@ export default function ProductsPage() {
                   type="file"
                   accept="image/*"
                   multiple
-                  onChange={(e) => {
-                    if (e.target.files)
-                      setImageFiles(Array.from(e.target.files));
-                  }}
+                  onChange={(e) =>
+                    e.target.files && setImageFiles(Array.from(e.target.files))
+                  }
                 />
               </div>
+
               <div className="col-span-2 flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button
-                  onClick={isEditing ? handleEditProduct : handleAddProduct}
-                >
+                <Button onClick={isEditing ? handleEditProduct : handleAddProduct}>
                   {isEditing ? "Update" : "Add"} Product
                 </Button>
               </div>
@@ -276,6 +289,7 @@ export default function ProductsPage() {
         </Dialog>
       </div>
 
+       {/* Product Table */}
       <Card>
         <CardHeader>
           <div className="relative">
@@ -288,7 +302,6 @@ export default function ProductsPage() {
             />
           </div>
         </CardHeader>
-        <>{console.log({ filteredProducts })}</>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -296,11 +309,10 @@ export default function ProductsPage() {
                 <tr className="border-b">
                   <th className="text-left py-3 px-4 font-medium">Product</th>
                   <th className="text-left py-3 px-4 font-medium">Category</th>
+                  <th className="text-left py-3 px-4 font-medium">Brand</th>
+                  <th className="text-left py-3 px-4 font-medium">Pet Type</th>
                   <th className="text-left py-3 px-4 font-medium">Price</th>
-                  <th className="text-left py-3 px-4 font-medium">
-                    Original Price
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium">Rating</th>
+                  <th className="text-left py-3 px-4 font-medium">Stock</th>
                   <th className="text-right py-3 px-4 font-medium">Actions</th>
                 </tr>
               </thead>
@@ -310,7 +322,11 @@ export default function ProductsPage() {
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-3">
                         <Image
-                          src={product.images?.[0] || "/placeholder.svg"}
+                          src={
+                            product?.images?.length > 0
+                              ? product.images[0]
+                              : "/placeholder.svg"
+                          }
                           alt={product.name}
                           width={40}
                           height={40}
@@ -319,24 +335,23 @@ export default function ProductsPage() {
                         <div>
                           <p className="font-medium">{product.name}</p>
                           <p className="text-sm text-gray-500">
-                            {product.brand}
+                            {product.description}
                           </p>
                         </div>
                       </div>
                     </td>
+                    <td className="py-3 px-4">{product.category}</td>
+                    <td className="py-3 px-4">{product.brand}</td>
+                    <td className="py-3 px-4">{product.pet_type}</td>
+                    <td className="py-3 px-4 font-medium">₹{product.price}</td>
                     <td className="py-3 px-4">
-                      <span>{product.category}</span>
-                      <p className="text-sm text-gray-500">
-                        {product.pet_type}
-                      </p>
+                      {product.quantity}{" "}
+                      {product.in_stock ? (
+                        <span className="text-green-600">(In Stock)</span>
+                      ) : (
+                        <span className="text-red-600">(Out of Stock)</span>
+                      )}
                     </td>
-                    <td className="py-3 px-4 font-medium">
-                      ₹{product.price.toFixed(2)}
-                    </td>
-                    <td className="py-3 px-4 font-medium">
-                      ₹{product.original_price.toFixed(2)}
-                    </td>
-                    <td className="py-3 px-4">⭐ {product.rating}</td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex justify-end">
                         <Button
@@ -347,7 +362,7 @@ export default function ProductsPage() {
                             setSelectedProduct(product);
                             setNewProduct({
                               ...product,
-                              images: product.images || [],
+                              images: product?.images || [],
                             });
                             setDialogOpen(true);
                           }}
@@ -381,6 +396,35 @@ function InputField({ label, type = "text", value, onChange }: any) {
     <div className="space-y-2">
       <Label>{label}</Label>
       <Input type={type} value={value} onChange={onChange} />
+    </div>
+  );
+}
+
+// Dropdown that fetches options from API
+function DropdownField({ label, value, onChange, endpoint }: any) {
+  const [options, setOptions] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch(endpoint)
+      .then((res) => res.json())
+      .then((data) => setOptions(data.items || data.categories || data.brands || data.pet_types || []));
+  }, [endpoint]);
+
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <select
+        className="border rounded px-3 py-2 w-full"
+        value={value}
+        onChange={onChange}
+      >
+        <option value="">Select {label}</option>
+        {options.map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.name}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
