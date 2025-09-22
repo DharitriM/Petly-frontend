@@ -157,7 +157,7 @@ export default function PetTypesPage() {
                     </tr>
                   ))
                 ) : (
-                  <span className="py-3 px-4 w-full">No pet types found 😞</span>
+                  <span className="py-3 px-4">No pet types found 😞</span>
                 )}
               </tbody>
             </table>

@@ -412,7 +412,7 @@ export default function ProductsPage() {
                     </tr>
                   ))
                 ) : (
-                  <span className="py-3 px-4 w-full">No product found 😞</span>
+                  <span className="py-3 px-4">No product found 😞</span>
                 )}
               </tbody>
             </table>

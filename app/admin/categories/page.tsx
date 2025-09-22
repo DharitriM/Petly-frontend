@@ -228,7 +228,7 @@ export default function CategoriesPage() {
                     </tr>
                   ))
                 ) : (
-                  <span className="py-3 px-4 w-full">No category found 😞</span>
+                  <span className="py-3 px-4">No category found 😞</span>
                 )}
               </tbody>
             </table>
