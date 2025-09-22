@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Search, Plus, Edit, Trash2 } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Pencil } from "lucide-react";
 import Image from "next/image";
 import {
   Dialog,
@@ -153,8 +153,10 @@ export default function ProductsPage() {
   const filteredProducts = products.filter(
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.brand.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      product.category.toLowerCase().includes(searchTerm.toLowerCase())
+      product?.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.pet_type?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.brand?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -162,7 +164,7 @@ export default function ProductsPage() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Products</h1>
-          <p className="text-gray-600">Manage your product catalog</p>
+          <p className="text-gray-600">Manage the product catalog</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -173,7 +175,7 @@ export default function ProductsPage() {
                 setDialogOpen(true);
               }}
             >
-              <Plus className="w-4 h-4 mr-2" /> Add Product
+              <Plus className="h-4" /> Add Product
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
@@ -211,7 +213,10 @@ export default function ProductsPage() {
                 type="number"
                 value={newProduct.original_price}
                 onChange={(e: any) =>
-                  setNewProduct({ ...newProduct, original_price: e.target.value })
+                  setNewProduct({
+                    ...newProduct,
+                    original_price: e.target.value,
+                  })
                 }
               />
               <InputField
@@ -280,7 +285,9 @@ export default function ProductsPage() {
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={isEditing ? handleEditProduct : handleAddProduct}>
+                <Button
+                  onClick={isEditing ? handleEditProduct : handleAddProduct}
+                >
                   {isEditing ? "Update" : "Add"} Product
                 </Button>
               </div>
@@ -289,10 +296,10 @@ export default function ProductsPage() {
         </Dialog>
       </div>
 
-       {/* Product Table */}
+      {/* Product Table */}
       <Card>
         <CardHeader>
-          <div className="relative">
+          <div className="relative w-[20vw]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Search products..."
@@ -317,70 +324,96 @@ export default function ProductsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map((product) => (
-                  <tr key={product.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-3">
-                        <Image
-                          src={
-                            product?.images?.length > 0
-                              ? product.images[0]
-                              : "/placeholder.svg"
-                          }
-                          alt={product.name}
-                          width={40}
-                          height={40}
-                          className="rounded"
-                        />
-                        <div>
-                          <p className="font-medium">{product.name}</p>
-                          <p className="text-sm text-gray-500">
-                            {product.description}
-                          </p>
+                {filteredProducts?.length > 0 ? (
+                  filteredProducts.map((product) => (
+                    <tr key={product.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center space-x-3">
+                          <Image
+                            src={
+                              product?.images?.length > 0
+                                ? product.images[0]
+                                : "/placeholder.svg"
+                            }
+                            alt={product.name}
+                            width={40}
+                            height={40}
+                            className="rounded"
+                          />
+                          <div>
+                            <p className="font-medium">{product.name}</p>
+                            <p className="text-sm text-gray-500">
+                              {product.description}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">{product.category}</td>
-                    <td className="py-3 px-4">{product.brand}</td>
-                    <td className="py-3 px-4">{product.pet_type}</td>
-                    <td className="py-3 px-4 font-medium">₹{product.price}</td>
-                    <td className="py-3 px-4">
-                      {product.quantity}{" "}
-                      {product.in_stock ? (
-                        <span className="text-green-600">(In Stock)</span>
-                      ) : (
-                        <span className="text-red-600">(Out of Stock)</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex justify-end">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setIsEditing(true);
-                            setSelectedProduct(product);
-                            setNewProduct({
-                              ...product,
-                              images: product?.images || [],
-                            });
-                            setDialogOpen(true);
-                          }}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleDeleteProduct(product.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="py-3 px-4">
+                        {product.category?.name ?? "-"}
+                      </td>
+                      <td className="py-3 px-4">
+                        {product.brand?.name ?? "-"}
+                      </td>
+                      <td className="py-3 px-4">
+                        {product.pet_type?.name ?? "-"}
+                      </td>
+                      <td className="py-3 px-4 font-medium">
+                        ₹{product.price}
+                      </td>
+                      <td className="py-3 px-4">
+                        {product.quantity}{" "}
+                        {product.in_stock ? (
+                          <span className="text-green-600">(In Stock)</span>
+                        ) : (
+                          <span className="text-red-600">(Out of Stock)</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex justify-end">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setIsEditing(true);
+                              setSelectedProduct(product);
+                              const imageUrls = product.images
+                                ? product.images
+                                : [];
+                              setNewProduct({
+                                name: product.name ?? "",
+                                description: product.description ?? "",
+                                price: product.price ?? 0,
+                                original_price: product.original_price ?? 0,
+                                weight: product.weight ?? 0,
+                                dimensions: product.dimensions ?? "",
+                                rating: product.rating ?? 0,
+                                reviews_count: product.reviews_count ?? 0,
+                                quantity: product.quantity ?? 0,
+                                images: imageUrls,
+                                category_id: product.category_id ?? "",
+                                brand_id: product.brand_id ?? "",
+                                pet_type_id: product.pet_type_id ?? "",
+                              });
+                              setDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => handleDeleteProduct(product.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <span className="py-3 px-4 w-full">No product found 😞</span>
+                )}
               </tbody>
             </table>
           </div>
@@ -407,7 +440,11 @@ function DropdownField({ label, value, onChange, endpoint }: any) {
   useEffect(() => {
     fetch(endpoint)
       .then((res) => res.json())
-      .then((data) => setOptions(data.items || data.categories || data.brands || data.pet_types || []));
+      .then((data) =>
+        setOptions(
+          data.items || data.categories || data.brands || data.pet_types || []
+        )
+      );
   }, [endpoint]);
 
   return (

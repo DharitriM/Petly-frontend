@@ -51,7 +51,7 @@ export default function HomePage() {
       ? products.filter(
           (product: Product) =>
             product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            product.brand.toLowerCase().includes(searchTerm.toLowerCase())
+            product.brand?.name.toLowerCase().includes(searchTerm.toLowerCase())
         )
       : products.slice(0, 4);
   console.log({ products, featuredProducts });
@@ -238,12 +238,12 @@ export default function HomePage() {
                           />
                         ))}
                       </div>
-                      <span className="text-sm text-gray-500">
+                      {/* <span className="text-sm text-gray-500">
                         ({product.reviews})
-                      </span>
+                      </span> */}
                     </div>
                     <h3 className="font-semibold mb-2">{product.name}</h3>
-                    <h5 className="mb-2 text-gray-600">{product.brand}</h5>
+                    <h5 className="mb-2 text-gray-600">{product.brand?.name}</h5>
                     <p className="text-sm text-gray-600">description</p>
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg font-bold text-green-600">

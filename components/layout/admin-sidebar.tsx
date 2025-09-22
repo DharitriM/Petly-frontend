@@ -64,7 +64,7 @@ const sidebarItems = [
   },
   {
     title: "Pet Types",
-    href: "/admin/pet-types",
+    href: "/admin/pet_types",
     icon: PawPrint,
   },
   // {
