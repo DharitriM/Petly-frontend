@@ -115,9 +115,7 @@ export default function BrandsPage() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>
-                {formData.id ? "Edit" : "Add"} Brand
-              </DialogTitle>
+              <DialogTitle>{formData.id ? "Edit" : "Add"} Brand</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -224,7 +222,14 @@ export default function BrandsPage() {
                     </tr>
                   ))
                 ) : (
-                  <span className="py-3 px-4">No brand found 😞</span>
+                  <tr>
+                    <td
+                      colSpan={3}
+                      className="py-3 px-4 text-center text-gray-500"
+                    >
+                      No brand found 😞
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
