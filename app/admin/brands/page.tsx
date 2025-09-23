@@ -16,6 +16,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 
 export default function BrandsPage() {
@@ -32,43 +33,55 @@ export default function BrandsPage() {
   };
 
   const uploadImage = async (): Promise<string | null> => {
-    if (!file) return formData.logo_url; // keep old image if editing
-    const ext = file.name.split(".").pop();
-    const fileName = `${uuidv4()}.${ext}`;
-    const { error } = await supabase.storage
-      .from("brand-images") // ✅ your Supabase bucket
-      .upload(fileName, file);
+    try {
+      if (!file) return formData.logo_url; // keep old image if editing
+      const ext = file.name.split(".").pop();
+      const fileName = `${uuidv4()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("brand-images") // ✅ your Supabase bucket
+        .upload(fileName, file);
 
-    if (error) {
+      if (error) {
+        console.error("Upload failed:", error.message);
+        return null;
+      }
+
+      const { data } = supabase.storage
+        .from("brand-images")
+        .getPublicUrl(fileName);
+
+      return data.publicUrl;
+    } catch (error: any) {
+      toast.error("Image upload failed: " + error.message);
       console.error("Upload failed:", error.message);
       return null;
     }
-
-    const { data } = supabase.storage
-      .from("brand-images")
-      .getPublicUrl(fileName);
-
-    return data.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const method = formData.id ? "PUT" : "POST";
+    try {
+      e.preventDefault();
+      const method = formData.id ? "PUT" : "POST";
 
-    const imageUrl = await uploadImage();
-    const updatedFormData = { ...formData, logo_url: imageUrl };
+      const imageUrl = await uploadImage();
+      const updatedFormData = { ...formData, logo_url: imageUrl };
 
-    await fetch("/api/brands", {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedFormData),
-    });
+      await fetch("/api/brands", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedFormData),
+      });
 
-    setFormData({ id: "", name: "", logo_url: "" });
-    setFile(null);
-    setOpen(false);
-    setIsEditing(false);
-    fetchBrands();
+      setFormData({ id: "", name: "", logo_url: "" });
+      setFile(null);
+      setOpen(false);
+      setIsEditing(false);
+      toast.success(`Brand ${formData.id ? "updated" : "added"} successfully`);
+      fetchBrands();
+    } catch (error: any) {
+      toast.error("Error: " + error.message);
+      console.error("Error submitting form:", error);
+    }
   };
 
   const handleEdit = (brand: brand) => {
@@ -88,6 +101,7 @@ export default function BrandsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
+    toast.success("Brand deleted successfully");
     fetchBrands();
   };
 
@@ -161,7 +175,7 @@ export default function BrandsPage() {
                   Cancel
                 </Button>
                 <Button type="submit" disabled={!formData.name.trim()}>
-                  {isEditing ? "Update" : "Add"} Brand
+                  {isEditing ? "Update" : "Add"}
                 </Button>
               </div>
             </form>
@@ -174,7 +188,8 @@ export default function BrandsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-medium">Category</th>
+                  <th className="text-left py-3 px-4 font-medium">Logo</th>
+                  <th className="text-left py-3 px-4 font-medium">Name</th>
                   <th className="text-left py-3 px-4 font-medium">
                     Product Count
                   </th>
@@ -186,7 +201,7 @@ export default function BrandsPage() {
                   brands.map((c) => (
                     <tr key={c.id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4">
-                        <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 relative">
                           <Image
                             src={c?.logo_url ? c.logo_url : "/placeholder.svg"}
                             alt={c.name}
@@ -194,17 +209,16 @@ export default function BrandsPage() {
                             height={40}
                             className="rounded"
                           />
-                          <div>
-                            <p className="font-medium">{c.name}</p>
-                          </div>
                         </div>
                       </td>
+                      <td className="py-3 px-4">{c.name}</td>
                       <td className="py-3 px-4">{c.product_count}</td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex gap-2 justify-end">
+                      <td className="py-3 px-2">
+                        <div className="flex gap-2">
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="text-blue-600 hover:text-blue-800"
                             onClick={() => handleEdit(c)}
                           >
                             <Edit className="w-4 h-4" />
@@ -212,7 +226,7 @@ export default function BrandsPage() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-600 hover:text-red-800"
                             onClick={() => handleDelete(c.id)}
                           >
                             <Trash2 className="w-4 h-4" />
@@ -223,10 +237,7 @@ export default function BrandsPage() {
                   ))
                 ) : (
                   <tr>
-                    <td
-                      colSpan={3}
-                      className="py-3 px-4 text-center text-gray-500"
-                    >
+                    <td colSpan={3} className="p-4 text-center text-gray-500">
                       No brand found 😞
                     </td>
                   </tr>

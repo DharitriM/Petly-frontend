@@ -235,7 +235,7 @@ export default function ProductsPage() {
                 }
               />
               <InputField
-                label="Stock Quantity"
+                label="Quantity"
                 type="number"
                 value={newProduct.quantity}
                 onChange={(e: any) =>

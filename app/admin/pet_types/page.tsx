@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { pet_type } from "@/lib/interfaces/pet_type";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function PetTypesPage() {
   const [petTypes, setPetTypes] = useState<pet_type[]>([]);
@@ -22,25 +23,38 @@ export default function PetTypesPage() {
   const [open, setOpen] = useState(false);
 
   const fetchPetTypes = async () => {
-    const res = await fetch("/api/pet-types");
-    const data = await res.json();
-    setPetTypes(data.pet_types || []);
+    try {
+      const res = await fetch("/api/pet-types");
+      const data = await res.json();
+      setPetTypes(data.pet_types || []);
+    } catch (error: any) {
+      toast.error("Error fetching pet types: " + error.message);
+      console.error("Error fetching pet types:", error);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const method = formData.id ? "PUT" : "POST";
+    try {
+      e.preventDefault();
+      const method = formData.id ? "PUT" : "POST";
 
-    await fetch("/api/pet-types", {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...formData }),
-    });
+      await fetch("/api/pet-types", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData }),
+      });
 
-    setFormData({ id: "", name: "" });
-    setOpen(false);
-    setIsEditing(false);
-    fetchPetTypes();
+      setFormData({ id: "", name: "" });
+      setOpen(false);
+      setIsEditing(false);
+      toast.success(
+        `Pet type ${formData.id ? "updated" : "added"} successfully`
+      );
+      fetchPetTypes();
+    } catch (error: any) {
+      toast.error("Error submitting form: " + error.message);
+      console.error("Error submitting form:", error);
+    }
   };
 
   const handleEdit = (pet_type: pet_type) => {
@@ -53,12 +67,18 @@ export default function PetTypesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    await fetch("/api/pet-types", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-    fetchPetTypes();
+    try {
+      await fetch("/api/pet-types", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      toast.success("Pet type deleted successfully");
+      fetchPetTypes();
+    } catch (error: any) {
+      toast.error("Error deleting pet type: " + error.message);
+      console.error("Error deleting pet type:", error);
+    }
   };
 
   useEffect(() => {
@@ -120,14 +140,14 @@ export default function PetTypesPage() {
           </DialogContent>
         </Dialog>
       </div>
-      <Card className="shadow-lg">
+      <Card className="shadow-lg w-[30vw]">
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full table-auto border-collapse">
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-3 px-4 font-medium">Name</th>
-                  <th className="text-left py-3 px-4 font-medium">Actions</th>
+                  <th className="text-right py-3 px-4 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -135,11 +155,12 @@ export default function PetTypesPage() {
                   petTypes.map((c) => (
                     <tr key={c.id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4">{c.name}</td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex gap-2 justify-end">
+                      <td className="py-3 flex justify-end">
+                        <div className="flex gap-2">
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="text-blue-600 hover:text-blue-800"
                             onClick={() => handleEdit(c)}
                           >
                             <Edit className="w-4 h-4" />

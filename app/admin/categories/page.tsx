@@ -17,6 +17,7 @@ import Image from "next/image";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/lib/supabaseClient";
 import { Edit, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -26,21 +27,28 @@ export default function CategoriesPage() {
   const [file, setFile] = useState<File | null>(null);
 
   const fetchCategories = async () => {
-    const res = await fetch("/api/categories");
-    const data = await res.json();
-    setCategories(data.categories || []);
+    try {
+      const res = await fetch("/api/categories");
+      const data = await res.json();
+      setCategories(data.categories || []);
+    } catch (error: any) {
+      console.error("Error fetching categories:", error);
+      toast.error("Error fetching categories: " + error.message);
+    }
   };
 
   const uploadImage = async (): Promise<string | null> => {
+    try {
     if (!file) return formData.image_url; // keep old image if editing
     const ext = file.name.split(".").pop();
     const fileName = `${uuidv4()}.${ext}`;
     const { error } = await supabase.storage
-      .from("category-images") // ✅ your Supabase bucket
+      .from("category-images")
       .upload(fileName, file);
 
     if (error) {
       console.error("Upload failed:", error.message);
+      toast.error("Image upload failed: " + error.message);
       return null;
     }
 
@@ -49,26 +57,41 @@ export default function CategoriesPage() {
       .getPublicUrl(fileName);
 
     return data.publicUrl;
+  } catch (error: any) {
+      console.error("Upload failed:", error);
+      toast.error("Image upload failed: " + error.message);
+      return null;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const method = formData.id ? "PUT" : "POST";
+    try {
+      e.preventDefault();
+      const method = formData.id ? "PUT" : "POST";
 
-    const imageUrl = await uploadImage();
-    const updatedFormData = { ...formData, image_url: imageUrl };
+      const imageUrl = await uploadImage();
+      if (!imageUrl && !isEditing) {
+        toast.error("Image upload is required.");
+        return;
+      }
+      const updatedFormData = { ...formData, image_url: imageUrl };
 
-    await fetch("/api/categories", {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedFormData),
-    });
+      await fetch("/api/categories", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedFormData),
+      });
 
-    setFormData({ id: "", name: "", image_url: "" });
-    setFile(null);
-    setOpen(false);
-    setIsEditing(false);
-    fetchCategories();
+      setFormData({ id: "", name: "", image_url: "" });
+      setFile(null);
+      setOpen(false);
+      setIsEditing(false);
+      toast.success(`Category ${formData.id ? "updated" : "added"} successfully`);
+      fetchCategories();
+    } catch (error: any) {
+      console.error("Error saving category:", error);
+      toast.error("Error saving category: " + error.message);
+    }
   };
 
   const handleEdit = (category: Category) => {
@@ -83,12 +106,18 @@ export default function CategoriesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    await fetch("/api/categories", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-    fetchCategories();
+    try {
+      await fetch("/api/categories", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      toast.success("Category deleted successfully");
+      fetchCategories();
+    } catch (error: any) {
+      console.error("Error deleting category:", error);
+      toast.error("Error deleting category: " + error.message);
+    }
   };
 
   useEffect(() => {
@@ -165,7 +194,7 @@ export default function CategoriesPage() {
                   Cancel
                 </Button>
                 <Button type="submit" disabled={!formData.name.trim()}>
-                  {isEditing ? "Update" : "Add"} Category
+                  {isEditing ? "Update" : "Add"}
                 </Button>
               </div>
             </form>
@@ -178,7 +207,8 @@ export default function CategoriesPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-medium">Category</th>
+                  <th className="text-left py-3 px-4 font-medium">Image</th>
+                  <th className="text-left py-3 px-4 font-medium">Name</th>
                   <th className="text-left py-3 px-4 font-medium">
                     Product Count
                   </th>
@@ -190,27 +220,22 @@ export default function CategoriesPage() {
                   categories.map((c) => (
                     <tr key={c.id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4">
-                        <div className="flex items-center space-x-3">
-                          <Image
-                            src={
-                              c?.image_url ? c.image_url : "/placeholder.svg"
-                            }
-                            alt={c.name}
-                            width={40}
-                            height={40}
-                            className="rounded"
-                          />
-                          <div>
-                            <p className="font-medium">{c.name}</p>
-                          </div>
-                        </div>
+                        <Image
+                          src={c?.image_url ? c.image_url : "/placeholder.svg"}
+                          alt={c.name}
+                          width={40}
+                          height={40}
+                          className="rounded"
+                        />
                       </td>
+                      <td className="py-3 px-4">{c.name}</td>
                       <td className="py-3 px-4">{c.product_count}</td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex gap-2 justify-end">
+                      <td className="py-3">
+                        <div className="flex gap-2">
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="text-blue-600 hover:text-blue-800"
                             onClick={() => handleEdit(c)}
                           >
                             <Edit className="w-4 h-4" />
@@ -218,7 +243,7 @@ export default function CategoriesPage() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-600 hover:text-red-800"
                             onClick={() => handleDelete(c.id)}
                           >
                             <Trash2 className="w-4 h-4" />

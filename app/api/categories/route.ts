@@ -3,16 +3,48 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   const { data, error } = await supabaseServer
-    .from("products")
+    .from("categories")
     .select(`
-      id, name, description, price, original_price, weight, dimensions,
-      rating, reviews_count, stock_quantity, in_stock, images,
-      category:categories ( id, name ),
-      brand:brands ( id, name ),
-      pet_type:pet_types ( id, name ),
-      created_at, user_id
+      id, name, image_url, product_count, created_at
     `)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-  return NextResponse.json({ products: data })
+  return NextResponse.json({ categories: data })
 }
+
+export async function POST(req: Request) {
+  const body = await req.json();
+  const { name, image_url } = body;
+
+  const { data, error } = await supabaseServer
+    .from("categories")
+    .insert([{ name, image_url }])
+    .select();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ category: data[0] });
+}
+
+export async function PUT(req: Request) {
+  const body = await req.json();
+  const { id, name, image_url } = body;
+
+  const { data, error } = await supabaseServer
+    .from("categories")
+    .update({ name, image_url })
+    .eq("id", id)
+    .select();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ category: data[0] });
+}
+
+export async function DELETE(req: Request) {
+  const body = await req.json();
+  const { id } = body;
+
+  const { error } = await supabaseServer.from("categories").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ success: true });
+} 
