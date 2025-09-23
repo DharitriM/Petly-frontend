@@ -35,9 +35,9 @@ export async function GET(req: Request) {
     .select(`
       id, name, description, price, original_price, weight, dimensions,
       rating, reviews_count, quantity, in_stock, images,
-      category:categories ( id, name ),
-      brand:brands ( id, name ),
-      pet_type:pet_types ( id, name ),
+      category:categories(id, name),
+      brand:brands(id, name),
+      pet_type:pet_types(id, name),
       created_at, user_id
     `);
 
