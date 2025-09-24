@@ -188,6 +188,7 @@ export default function BrandsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
+                  <th className="text-left py-3 px-4 font-medium">ID</th>
                   <th className="text-left py-3 px-4 font-medium">Logo</th>
                   <th className="text-left py-3 px-4 font-medium">Name</th>
                   <th className="text-left py-3 px-4 font-medium">
@@ -200,6 +201,7 @@ export default function BrandsPage() {
                 {brands?.length > 0 ? (
                   brands.map((c) => (
                     <tr key={c.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 font-mono">{c.id}</td>
                       <td className="py-3 px-4">
                         <div className="w-10 h-10 relative">
                           <Image

@@ -44,7 +44,6 @@ export default function HomePage() {
     };
     fetchProducts();
   }, []);
-  console.log("Products from HomePage:", products);
 
   const featuredProducts =
     products?.length > 0 && searchTerm
@@ -54,7 +53,6 @@ export default function HomePage() {
             product.brand?.name.toLowerCase().includes(searchTerm.toLowerCase())
         )
       : products.slice(0, 4);
-  console.log({ products, featuredProducts });
 
   return (
     <div className="min-h-screen">

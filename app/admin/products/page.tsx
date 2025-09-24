@@ -314,36 +314,54 @@ export default function ProductsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
+                  <th className="text-left py-3 px-4 font-medium">ID</th>
+                  <th className="text-left py-3 px-4 font-medium">Image</th>
                   <th className="text-left py-3 px-4 font-medium">Product</th>
                   <th className="text-left py-3 px-4 font-medium">Category</th>
                   <th className="text-left py-3 px-4 font-medium">Brand</th>
                   <th className="text-left py-3 px-4 font-medium">Pet Type</th>
                   <th className="text-left py-3 px-4 font-medium">Price</th>
                   <th className="text-left py-3 px-4 font-medium">Stock</th>
-                  <th className="text-right py-3 px-4 font-medium">Actions</th>
+                  <th className="py-3 px-4 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredProducts?.length > 0 ? (
                   filteredProducts.map((product) => (
                     <tr key={product.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 font-mono">{product.id}</td>
+                      <td className="py-3 px-4">
+                        <Image
+                          src={
+                            product?.images?.length > 0
+                              ? product.images[0]
+                              : "/placeholder.svg"
+                          }
+                          alt={product.name}
+                          width={40}
+                          height={40}
+                          className="rounded"
+                        />
+                      </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center space-x-3">
-                          <Image
-                            src={
-                              product?.images?.length > 0
-                                ? product.images[0]
-                                : "/placeholder.svg"
-                            }
-                            alt={product.name}
-                            width={40}
-                            height={40}
-                            className="rounded"
-                          />
                           <div>
                             <p className="font-medium">{product.name}</p>
                             <p className="text-sm text-gray-500">
-                              {product.description}
+                              {product.description ? (
+                                <span
+                                  dangerouslySetInnerHTML={{
+                                    __html: `${product.description?.slice(
+                                      0,
+                                      50
+                                    )}...`,
+                                  }}
+                                ></span>
+                              ) : (
+                                <span className="italic text-gray-400">
+                                  No description
+                                </span>
+                              )}
                             </p>
                           </div>
                         </div>
@@ -369,10 +387,11 @@ export default function ProductsPage() {
                         )}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <div className="flex justify-end">
+                        <div className="flex justify-center">
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="text-blue-600 hover:text-blue-800"
                             onClick={() => {
                               setIsEditing(true);
                               setSelectedProduct(product);
@@ -402,7 +421,7 @@ export default function ProductsPage() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-600 hover:text-red-800"
                             onClick={() => handleDeleteProduct(product.id)}
                           >
                             <Trash2 className="w-4 h-4" />

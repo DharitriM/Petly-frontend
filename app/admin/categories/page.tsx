@@ -207,6 +207,7 @@ export default function CategoriesPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
+                  <th className="text-left py-3 px-4 font-medium">ID</th>
                   <th className="text-left py-3 px-4 font-medium">Image</th>
                   <th className="text-left py-3 px-4 font-medium">Name</th>
                   <th className="text-left py-3 px-4 font-medium">
@@ -219,6 +220,7 @@ export default function CategoriesPage() {
                 {categories?.length > 0 ? (
                   categories.map((c) => (
                     <tr key={c.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 font-mono">{c.id}</td>
                       <td className="py-3 px-4">
                         <Image
                           src={c?.image_url ? c.image_url : "/placeholder.svg"}

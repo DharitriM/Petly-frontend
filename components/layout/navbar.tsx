@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "../ui/input";
 import { useDispatch } from "react-redux";
 import { setSearchTerm } from "@/store/slices/searchSlice";
+import { toast } from "sonner";
 
 const servicesMenu = [
   {
@@ -80,9 +81,9 @@ export default function Navbar() {
 
   const handleLogout = () => {
     setIsOpen(false);
-    router.push("/auth/login");
+    toast.success("Logged out successfully");
     localStorage.clear();
-    console.log("User logged out");
+    router.push("/auth/login");
   };
 
   const handleSearch = () => {

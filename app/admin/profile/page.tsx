@@ -111,7 +111,6 @@ export default function ProfilePage() {
       if (error) {
         console.error("Error fetching profile:", error);
       } else {
-        console.log({ data });
         const initialProfileData = {
           firstName: data.first_name || "",
           lastName: data.last_name || "",

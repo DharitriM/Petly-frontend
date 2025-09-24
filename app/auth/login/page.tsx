@@ -70,8 +70,6 @@ export default function LoginPage() {
           general: error.message || "Login failed. Please try again.",
         });
       } else {
-        console.log("Login success:", data);
-
         // Optional: Save session if you want persistent login across refresh
         if (formData.rememberMe) {
           localStorage.setItem("supabaseSession", JSON.stringify(data.session));

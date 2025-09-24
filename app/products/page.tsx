@@ -54,8 +54,6 @@ export default function ProductsPage() {
     return matchesSearch && matchesCategory && matchesBrand && matchesPetType
   })
 
-  console.log("in products page:", { products})
-
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
       case "price-low":

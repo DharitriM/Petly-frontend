@@ -146,6 +146,7 @@ export default function PetTypesPage() {
             <table className="w-full table-auto border-collapse">
               <thead>
                 <tr className="border-b">
+                  <th className="text-left py-3 px-4 font-medium">ID</th>
                   <th className="text-left py-3 px-4 font-medium">Name</th>
                   <th className="text-right py-3 px-4 font-medium">Actions</th>
                 </tr>
@@ -154,6 +155,7 @@ export default function PetTypesPage() {
                 {petTypes?.length > 0 ? (
                   petTypes.map((c) => (
                     <tr key={c.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 font-mono">{c.id}</td>
                       <td className="py-3 px-4">{c.name}</td>
                       <td className="py-3 flex justify-end">
                         <div className="flex gap-2">

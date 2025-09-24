@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteUser, setUsers, updateUser } from "@/store/slices/userSlice";
 import { User } from "@/lib/interfaces/user";
+import { toast } from "sonner";
 
 const supabase = require("@/lib/supabaseClient").supabase;
 
@@ -35,41 +36,47 @@ export default function UsersPage() {
   });
   const users = useSelector((state: any) => state.user.users);
 
-  useEffect(() => {
-    async function fetchUsers() {
+  async function fetchUsers() {
+    try {
       const user = await supabase.auth.getUser();
       setCurrentUserId(user?.data?.user?.id);
 
-      const { data, error } = await supabase.from("user_profiles").select("*");
-      if (!error) dispatch(setUsers(data));
-      else console.error("Error fetching users:", error.message);
+      const res = await fetch("/api/users");
+      const data = await res.json();
+      dispatch(setUsers(data));
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      toast.error("Error fetching users");
     }
-    fetchUsers();
-  }, []);
+  }
 
-  const handleEditUser = async () => {
-    const { data, error } = await supabase
-      .from("user_profiles")
-      .update({ ...newUser })
-      .eq("id", selectedUser.id)
-      .select();
-
-    if (!error && data) {
-       dispatch(updateUser(data[0]));
+  async function handleEditUser() {
+    try {
+      const res = await fetch(`/api/users/${selectedUser.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newUser),
+      });
+      const updatedUser = await res.json();
+      dispatch(updateUser(updatedUser));
+      toast.success("User updated successfully");
       resetForm();
-    } else {
-      console.error("Failed to update user:", error?.message);
+    } catch (err) {
+      console.error("Error updating user:", err);
+      toast.error("Error updating user");
     }
-  };
+  }
 
-  const handleDeleteUser = async (id: string) => {
-    const { error } = await supabase.from("user_profiles").delete().eq("id", id);
-    if (!error) {
+  async function handleDeleteUser(id: string) {
+    try {
+      await fetch(`/api/users/${id}`, { method: "DELETE" });
       dispatch(deleteUser(id));
-    } else {
-      console.error("Failed to delete user:", error?.message);
+      toast.success("User deleted successfully");
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      toast.error("Error deleting user");
     }
-  };
+  }
 
   const resetForm = () => {
     setNewUser({
@@ -84,12 +91,19 @@ export default function UsersPage() {
     setSelectedUser(null);
   };
 
-  const filteredUsers = users?.length > 0 && users.filter(
-    (u: User) =>
-      u.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.phone?.includes(searchTerm)
-  ) || [];
+  const filteredUsers =
+    (users?.length > 0 &&
+      users.filter(
+        (u: User) =>
+          u.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          u.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          u.phone?.includes(searchTerm)
+      )) ||
+    [];
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   return (
     <div className="p-6">
@@ -117,6 +131,7 @@ export default function UsersPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
+                  <th className="text-left py-3 px-4">ID</th>
                   <th className="text-left py-3 px-4">First Name</th>
                   <th className="text-left py-3 px-4">Last Name</th>
                   <th className="text-left py-3 px-4">Phone</th>
@@ -127,83 +142,90 @@ export default function UsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers?.length > 0 ? filteredUsers.map((user: User) => (
-                  <tr key={user.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">{user.first_name}</td>
-                    <td className="py-3 px-4 font-medium">{user.last_name}</td>
-                    <td className="py-3 px-4">{user.phone}</td>
-                    <td className="py-3 px-4">
-                      {user.interests?.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {user.interests.map((interest: string) => (
-                            <Badge key={interest}>{interest}</Badge>
-                          ))}
+                {filteredUsers?.length > 0 ? (
+                  filteredUsers.map((user: User) => (
+                    <tr key={user.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 font-mono text-sm">{user.id}</td>
+                      <td className="py-3 px-4 font-medium">
+                        {user.first_name}
+                      </td>
+                      <td className="py-3 px-4 font-medium">
+                        {user.last_name}
+                      </td>
+                      <td className="py-3 px-4">{user.phone}</td>
+                      <td className="py-3 px-4">
+                        {user.interests?.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {user.interests.map((interest: string) => (
+                              <Badge key={interest}>{interest}</Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-gray-600">—</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 align-top">
+                        {user.has_pets && user.pets?.length > 0 ? (
+                          <div className="flex flex-col gap-2">
+                            {user.pets.map((pet: any, index: number) => (
+                              <div
+                                key={index}
+                                className="flex flex-wrap items-center gap-2 w-fit p-2 rounded-md shadow-sm border border-gray-200"
+                              >
+                                <span className="text-sm font-medium text-gray-800">
+                                  {pet.name}
+                                </span>
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full uppercase">
+                                  {pet.type}
+                                </span>
+                                <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                                  {pet.breed}
+                                </span>
+                                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full capitalize">
+                                  {pet.age.replace("-", " ")}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-gray-600">—</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge variant="default">
+                          {user.is_admin
+                            ? user.id === currentUserId
+                              ? "Admin / you"
+                              : "Admin"
+                            : "User"}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex justify-end">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setNewUser(user);
+                              setDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => handleDeleteUser(user.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
-                      ) : (
-                        <span className="text-gray-600">—</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 align-top">
-                      {user.has_pets && user.pets?.length > 0 ? (
-                        <div className="flex flex-col gap-2">
-                          {user.pets.map((pet: any, index: number) => (
-                            <div
-                              key={index}
-                              className="flex flex-wrap items-center gap-2 w-fit p-2 rounded-md shadow-sm border border-gray-200"
-                            >
-                              <span className="text-sm font-medium text-gray-800">
-                                {pet.name}
-                              </span>
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full uppercase">
-                                {pet.type}
-                              </span>
-                              <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-                                {pet.breed}
-                              </span>
-                              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full capitalize">
-                                {pet.age.replace("-", " ")}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-gray-600">—</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge variant="default">
-                        {user.is_admin
-                          ? user.id === currentUserId
-                            ? "Admin / you"
-                            : "Admin"
-                          : "User"}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex justify-end">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setNewUser(user);
-                            setDialogOpen(true);
-                          }}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleDeleteUser(user.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                )) : (
+                      </td>
+                    </tr>
+                  ))
+                ) : (
                   <tr>
                     <td colSpan={7} className="py-3 px-4 text-center">
                       No users found

@@ -227,7 +227,6 @@ export default function SignupPage() {
         setIsLoading(false);
         return;
       }
-      console.log("Auth Data:", authData, signUpError);
       localStorage.setItem("authData", JSON.stringify(authData?.user));
 
       // Step 2: Insert user profile in `user_profiles` table
