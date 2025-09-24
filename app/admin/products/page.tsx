@@ -18,11 +18,13 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RootState } from "@/store";
 import { useSelector, useDispatch } from "react-redux";
 import { setProducts } from "@/store/slices/productSlice";
+import { useRouter } from "next/navigation";
 
 const supabase = require("@/lib/supabaseClient").supabase;
 
 export default function ProductsPage() {
   const dispatch = useDispatch();
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -328,7 +330,15 @@ export default function ProductsPage() {
               <tbody>
                 {filteredProducts?.length > 0 ? (
                   filteredProducts.map((product) => (
-                    <tr key={product.id} className="border-b hover:bg-gray-50">
+                    <tr
+                      key={product.id}
+                      className="border-b hover:bg-gray-50"
+                      onClick={(e) => {
+                        if (!(e.target as HTMLElement).closest(".row-action")) {
+                          router.push(`/admin/products/${product.id}`);
+                        }
+                      }}
+                    >
                       <td className="py-3 px-4 font-mono">{product.id}</td>
                       <td className="py-3 px-4">
                         <Image
@@ -392,7 +402,8 @@ export default function ProductsPage() {
                             size="sm"
                             variant="ghost"
                             className="text-blue-600 hover:text-blue-800"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setIsEditing(true);
                               setSelectedProduct(product);
                               const imageUrls = product.images
@@ -422,7 +433,10 @@ export default function ProductsPage() {
                             size="sm"
                             variant="ghost"
                             className="text-red-600 hover:text-red-800"
-                            onClick={() => handleDeleteProduct(product.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteProduct(product.id);
+                            }}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

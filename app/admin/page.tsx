@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   TrendingUp,
   Eye,
+  Loader,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -148,7 +149,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="p-6 text-center text-gray-600">
-        Loading admin dashboard...
+        <Loader className="w-6 h-6 animate-spin" />
       </div>
     );
   }

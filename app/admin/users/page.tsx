@@ -17,11 +17,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteUser, setUsers, updateUser } from "@/store/slices/userSlice";
 import { User } from "@/lib/interfaces/user";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const supabase = require("@/lib/supabaseClient").supabase;
 
 export default function UsersPage() {
   const dispatch = useDispatch();
+  const router = useRouter();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -144,7 +147,15 @@ export default function UsersPage() {
               <tbody>
                 {filteredUsers?.length > 0 ? (
                   filteredUsers.map((user: User) => (
-                    <tr key={user.id} className="border-b hover:bg-gray-50">
+                    <tr
+                      key={user.id}
+                      className="border-b hover:bg-gray-50"
+                      onClick={(e) => {
+                        if (!(e.target as HTMLElement).closest(".row-action")) {
+                          router.push(`/admin/users/${user.id}`);
+                        }
+                      }}
+                    >
                       <td className="py-3 px-4 font-mono text-sm">{user.id}</td>
                       <td className="py-3 px-4 font-medium">
                         {user.first_name}
@@ -205,7 +216,8 @@ export default function UsersPage() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setSelectedUser(user);
                               setNewUser(user);
                               setDialogOpen(true);
@@ -217,7 +229,10 @@ export default function UsersPage() {
                             size="sm"
                             variant="ghost"
                             className="text-red-600 hover:text-red-700"
-                            onClick={() => handleDeleteUser(user.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteUser(user.id);
+                            }}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
