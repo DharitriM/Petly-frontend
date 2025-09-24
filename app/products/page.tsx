@@ -19,31 +19,10 @@ import { RootState } from "@/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setProducts } from "@/store/slices/productSlice";
 import { toast } from "sonner";
+import { setPetTypes } from "@/store/slices/petTypeSlice";
+import { setBrands } from "@/store/slices/brandSlice";
+import { setCategories } from "@/store/slices/categorySlice";
 
-const categories = [
-  { id: "toys", name: "Toys", count: 45 },
-  { id: "food", name: "Food", count: 32 },
-  { id: "accessories", name: "Accessories", count: 28 },
-  { id: "home", name: "Home & Beds", count: 19 },
-  { id: "grooming", name: "Grooming", count: 15 },
-  { id: "health", name: "Health", count: 12 },
-];
-
-const petTypes = [
-  { id: "dog", name: "Dogs", count: 89 },
-  { id: "cat", name: "Cats", count: 67 },
-  { id: "bird", name: "Birds", count: 23 },
-  { id: "fish", name: "Fish", count: 18 },
-];
-
-const brands = [
-  { id: "petplay", name: "PetPlay" },
-  { id: "comfypet", name: "ComfyPet" },
-  { id: "naturalpet", name: "NaturalPet" },
-  { id: "fashionpet", name: "FashionPet" },
-  { id: "catfun", name: "CatFun" },
-  { id: "cleanpet", name: "CleanPet" },
-];
 
 export default function ProductsPage() {
   const dispatch = useDispatch();
@@ -53,8 +32,11 @@ export default function ProductsPage() {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("featured");
   const [showFilters, setShowFilters] = useState(false);
-  const products = useSelector((state: RootState) => state.product.products);
-  console.log({ products });
+  const {products, count: productCount} = useSelector((state: RootState) => state.product);
+  const {petTypes, count: petTypeCount} = useSelector((state: RootState) => state.petType);
+  const {categories, count: categoryCount} = useSelector((state: RootState) => state.category);
+  const {brands, count: brandCount} = useSelector((state: RootState) => state.brand);
+
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
@@ -82,8 +64,50 @@ export default function ProductsPage() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("/api/categories");
+      const data = await res.json();
+      if (data.categories) {
+        dispatch(setCategories(data.categories));
+      }
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+      toast.error("Failed to fetch categories");
+    }
+  };
+
+  const fetchBrands = async () => {
+    try {
+      const res = await fetch("/api/brands");
+      const data = await res.json();
+      if (data.brands) {
+        dispatch(setBrands(data.brands));
+      }
+    } catch (error) {
+      console.error("Failed to fetch brands:", error);
+      toast.error("Failed to fetch brands");
+    }
+  };
+
+  const fetchPetTypes = async () => {
+    try {
+      const res = await fetch("/api/pet-types");
+      const data = await res.json();
+      if (data.pet_types) {
+        dispatch(setPetTypes(data.pet_types));
+      }
+    } catch (error) {
+      console.error("Failed to fetch pet types:", error);
+      toast.error("Failed to fetch pet types");
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
+    fetchBrands();
+    fetchPetTypes();
   }, []);
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -162,7 +186,7 @@ export default function ProductsPage() {
           className={`lg:block ${showFilters ? "block" : "hidden"} space-y-6`}
         >
           <Card className="p-6">
-            <h3 className="font-semibold mb-4">Categories</h3>
+            <h3 className="font-semibold mb-4">Categories ({categoryCount})</h3>
             <div className="space-y-2">
               <Button
                 variant={selectedCategory === "" ? "default" : "ghost"}
@@ -182,7 +206,7 @@ export default function ProductsPage() {
                 >
                   {category.name}
                   <span className="text-xs text-gray-500">
-                    ({category.count})
+                    ({category.product_count || 0})
                   </span>
                 </Button>
               ))}
@@ -190,7 +214,7 @@ export default function ProductsPage() {
           </Card>
 
           <Card className="p-6">
-            <h3 className="font-semibold mb-4">Pet Type</h3>
+            <h3 className="font-semibold mb-4">Pet Type ({petTypeCount})</h3>
             <div className="space-y-2">
               <Button
                 variant={selectedPetType === "" ? "default" : "ghost"}
@@ -207,14 +231,14 @@ export default function ProductsPage() {
                   onClick={() => setSelectedPetType(type.id)}
                 >
                   {type.name}
-                  <span className="text-xs text-gray-500">({type.count})</span>
+                  {/* <span className="text-xs text-gray-500">({type || 0})</span> */}
                 </Button>
               ))}
             </div>
           </Card>
 
           <Card className="p-6">
-            <h3 className="font-semibold mb-4">Brands</h3>
+            <h3 className="font-semibold mb-4">Brands ({brandCount})</h3>
             <div className="space-y-3">
               {brands.map((brand) => (
                 <div key={brand.id} className="flex items-center space-x-2">
@@ -228,6 +252,7 @@ export default function ProductsPage() {
                   <label htmlFor={brand.id} className="text-sm cursor-pointer">
                     {brand.name}
                   </label>
+                  <span className="text-xs text-gray-500">({brand.product_count || 0})</span>
                 </div>
               ))}
             </div>
