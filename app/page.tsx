@@ -190,14 +190,7 @@ export default function HomePage() {
               Handpicked favorites for your furry friends
             </p>
           </div>
-          <div
-            // className={`${
-            //   featuredProducts?.length > 3
-            //     ? "grid md:grid-cols-2 lg:grid-cols-4 gap-6"
-            //     : "flex justify-center gap-6 flex-wrap"
-            // }`}
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProducts?.length > 0 ? (
               featuredProducts.map((product: Product) => (
                 <Card

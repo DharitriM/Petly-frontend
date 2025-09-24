@@ -1,16 +1,24 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Heart, ShoppingCart, Star, Filter, Search } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
-import { RootState } from "@/store"
-import { useSelector } from "react-redux"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Heart, ShoppingCart, Star, Filter, Search } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { RootState } from "@/store";
+import { useDispatch, useSelector } from "react-redux";
+import { setProducts } from "@/store/slices/productSlice";
+import { toast } from "sonner";
 
 const categories = [
   { id: "toys", name: "Toys", count: 45 },
@@ -19,14 +27,14 @@ const categories = [
   { id: "home", name: "Home & Beds", count: 19 },
   { id: "grooming", name: "Grooming", count: 15 },
   { id: "health", name: "Health", count: 12 },
-]
+];
 
 const petTypes = [
   { id: "dog", name: "Dogs", count: 89 },
   { id: "cat", name: "Cats", count: 67 },
   { id: "bird", name: "Birds", count: 23 },
   { id: "fish", name: "Fish", count: 18 },
-]
+];
 
 const brands = [
   { id: "petplay", name: "PetPlay" },
@@ -35,54 +43,82 @@ const brands = [
   { id: "fashionpet", name: "FashionPet" },
   { id: "catfun", name: "CatFun" },
   { id: "cleanpet", name: "CleanPet" },
-]
+];
 
 export default function ProductsPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("")
-  const [selectedPetType, setSelectedPetType] = useState("")
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
-  const [sortBy, setSortBy] = useState("featured")
-  const [showFilters, setShowFilters] = useState(false)
-  const products = useSelector((state: RootState) => state.product.products)
-
+  const dispatch = useDispatch();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedPetType, setSelectedPetType] = useState("");
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState("featured");
+  const [showFilters, setShowFilters] = useState(false);
+  const products = useSelector((state: RootState) => state.product.products);
+  console.log({ products });
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = !selectedCategory || product.category === selectedCategory
-    const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brand.toLowerCase())
-    const matchesPetType = !selectedPetType || product.pet_type === selectedPetType
-    return matchesSearch && matchesCategory && matchesBrand && matchesPetType
-  })
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      !selectedCategory || product.category?.id === selectedCategory;
+    const matchesBrand =
+      selectedBrands.length === 0 ||
+      selectedBrands.includes(product?.brand?.id ? product.brand.id : "");
+    const matchesPetType =
+      !selectedPetType || product.pet_type?.id === selectedPetType;
+    return matchesSearch && matchesCategory && matchesBrand && matchesPetType;
+  });
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch("/api/products");
+      const data = await res.json();
+      if (data.products) {
+        dispatch(setProducts(data.products));
+      }
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+      toast.error("Failed to fetch products");
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
       case "price-low":
-        return a.price - b.price
+        return a.price - b.price;
       case "price-high":
-        return b.price - a.price
+        return b.price - a.price;
       case "rating":
-        return b.rating - a.rating
+        return b.rating - a.rating;
       case "newest":
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
       default:
-        return 0
+        return 0;
     }
-  })
+  });
 
   const handleBrandChange = (brandId: string, checked: boolean) => {
     if (checked) {
-      setSelectedBrands([...selectedBrands, brandId])
+      setSelectedBrands([...selectedBrands, brandId]);
     } else {
-      setSelectedBrands(selectedBrands.filter((id) => id !== brandId))
+      setSelectedBrands(selectedBrands.filter((id) => id !== brandId));
     }
-  }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Pet Products</h1>
-        <p className="text-gray-600">Discover the best products for your furry friends</p>
+        <p className="text-gray-600">
+          Discover the best products for your furry friends
+        </p>
       </div>
 
       {/* Search and Sort */}
@@ -109,7 +145,11 @@ export default function ProductsPage() {
               <SelectItem value="newest">Newest</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="md:hidden">
+          <Button
+            variant="outline"
+            onClick={() => setShowFilters(!showFilters)}
+            className="md:hidden"
+          >
             <Filter className="w-4 h-4 mr-2" />
             Filters
           </Button>
@@ -118,7 +158,9 @@ export default function ProductsPage() {
 
       <div className="grid lg:grid-cols-4 gap-8">
         {/* Filters Sidebar */}
-        <div className={`lg:block ${showFilters ? "block" : "hidden"} space-y-6`}>
+        <div
+          className={`lg:block ${showFilters ? "block" : "hidden"} space-y-6`}
+        >
           <Card className="p-6">
             <h3 className="font-semibold mb-4">Categories</h3>
             <div className="space-y-2">
@@ -132,12 +174,16 @@ export default function ProductsPage() {
               {categories.map((category) => (
                 <Button
                   key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "ghost"}
+                  variant={
+                    selectedCategory === category.id ? "default" : "ghost"
+                  }
                   className="w-full justify-between"
                   onClick={() => setSelectedCategory(category.id)}
                 >
                   {category.name}
-                  <span className="text-xs text-gray-500">({category.count})</span>
+                  <span className="text-xs text-gray-500">
+                    ({category.count})
+                  </span>
                 </Button>
               ))}
             </div>
@@ -175,7 +221,9 @@ export default function ProductsPage() {
                   <Checkbox
                     id={brand.id}
                     checked={selectedBrands.includes(brand.id)}
-                    onCheckedChange={(checked) => handleBrandChange(brand.id, checked as boolean)}
+                    onCheckedChange={(checked) =>
+                      handleBrandChange(brand.id, checked as boolean)
+                    }
                   />
                   <label htmlFor={brand.id} className="text-sm cursor-pointer">
                     {brand.name}
@@ -196,11 +244,18 @@ export default function ProductsPage() {
 
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
             {sortedProducts.map((product) => (
-              <Card key={product.id} className="group hover:shadow-xl transition-shadow">
+              <Card
+                key={product.id}
+                className="group hover:shadow-xl transition-shadow"
+              >
                 <div className="relative overflow-hidden">
                   <Link href={`/products/${product.id}`}>
                     <Image
-                      src={product?.images?.length > 0 ? product.images[0] : "/placeholder.svg"}
+                      src={
+                        product?.images?.length > 0
+                          ? product.images[0]
+                          : "/placeholder.svg"
+                      }
                       alt={product.name}
                       width={300}
                       height={300}
@@ -209,7 +264,11 @@ export default function ProductsPage() {
                   </Link>
                   {/* {!product.inStock && <Badge className="absolute top-2 right-2 bg-gray-500">Out of Stock</Badge>} */}
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="secondary" className="rounded-full p-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="rounded-full p-2"
+                    >
                       <Heart className="w-4 h-4" />
                     </Button>
                   </div>
@@ -221,28 +280,42 @@ export default function ProductsPage() {
                         <Star
                           key={i}
                           className={`w-4 h-4 ${
-                            i < Math.floor(product.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                            i < Math.floor(product.rating)
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="text-sm text-gray-500">({product.reviews})</span>
+                    {/* <span className="text-sm text-gray-500">({product.reviews})</span> */}
                   </div>
                   <Link href={`/products/${product.id}`}>
-                    <h3 className="font-semibold mb-2 hover:text-purple-600 cursor-pointer">{product.name}</h3>
+                    <h3 className="font-semibold mb-2 hover:text-purple-600 cursor-pointer">
+                      {product.name}
+                    </h3>
                   </Link>
-                  <p className="text-sm text-gray-500 mb-2">{product.brand}</p>
+                  <p className="text-sm text-gray-500 mb-2">
+                    {product.brand?.name} | {product.category?.name}
+                  </p>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-lg font-bold text-green-600">₹{product.price}</span>
+                    <span className="text-lg font-bold text-green-600">
+                      ₹{product.price}
+                    </span>
                     {product.original_price && (
-                      <span className="text-sm text-gray-500 line-through">₹{product.original_price}</span>
+                      <span className="text-sm text-gray-500 line-through">
+                        ₹{product.original_price}
+                      </span>
                     )}
                   </div>
                   <div className="flex gap-2">
-                    {/* <Button className="flex-1" size="sm" disabled={!product.inStock}> */}
-                      <ShoppingCart className="w-4 h-4 mr-2" />Add to Cart
-                      {/* {product.inStock ? "Add to Cart" : "Out of Stock"} */}
-                    {/* </Button> */}
+                    <Button
+                      className="flex-1"
+                      size="sm"
+                      disabled={!product.in_stock}
+                    >
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      {product.in_stock ? "Add to Cart" : "Out of Stock"}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -251,14 +324,16 @@ export default function ProductsPage() {
 
           {sortedProducts.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
+              <p className="text-gray-500 text-lg">
+                No products found matching your criteria.
+              </p>
               <Button
                 className="mt-4"
                 onClick={() => {
-                  setSearchTerm("")
-                  setSelectedCategory("")
-                  setSelectedPetType("")
-                  setSelectedBrands([])
+                  setSearchTerm("");
+                  setSelectedCategory("");
+                  setSelectedPetType("");
+                  setSelectedBrands([]);
                 }}
               >
                 Clear Filters
@@ -268,5 +343,5 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
