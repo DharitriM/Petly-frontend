@@ -3,10 +3,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface ProductState {
   products: Product[];
+  count: number;
 }
 
 const initialState: ProductState = {
   products: [],
+  count: 0,
 };
 
 const productSlice = createSlice({
@@ -15,9 +17,11 @@ const productSlice = createSlice({
   reducers: {
     setProducts: (state, action: PayloadAction<Product[]>) => {
       state.products = action.payload;
+      state.count = action.payload.length;
     },
     addProduct: (state, action: PayloadAction<Product>) => {
       state.products.push(action.payload);
+      state.count += 1;
     },
     updateProduct: (state, action: PayloadAction<Product>) => {
       const index = state.products.findIndex((p: any) => p.id === action.payload.id);
@@ -27,6 +31,7 @@ const productSlice = createSlice({
     },
     deleteProduct: (state, action: PayloadAction<string>) => {
       state.products = state.products.filter((p: any) => p.id !== action.payload);
+      state.count -= 1;
     },
   },
 });

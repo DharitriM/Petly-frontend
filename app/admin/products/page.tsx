@@ -19,6 +19,7 @@ import { RootState } from "@/store";
 import { useSelector, useDispatch } from "react-redux";
 import { setProducts } from "@/store/slices/productSlice";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const supabase = require("@/lib/supabaseClient").supabase;
 
@@ -45,18 +46,24 @@ export default function ProductsPage() {
     brand_id: "",
     pet_type_id: "",
   });
-  const products = useSelector((state: RootState) => state.product.products);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
+  const { products, count } = useSelector((state: RootState) => state.product);
+ 
+  const fetchProducts = async () => {
+    try {
       const res = await fetch("/api/products");
       const data = await res.json();
       if (data.products) {
         dispatch(setProducts(data.products));
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+      toast.error("Failed to fetch products");
+    }
+  };
+
+  useEffect(() => {
     fetchProducts();
-  }, [dispatch]);
+  }, []);
 
   const uploadImages = async () => {
     const urls: string[] = [];
@@ -165,7 +172,7 @@ export default function ProductsPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Products</h1>
+          <h1 className="text-2xl font-bold">Products ({count})</h1>
           <p className="text-gray-600">Manage the product catalog</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

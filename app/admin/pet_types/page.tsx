@@ -12,21 +12,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { pet_type } from "@/lib/interfaces/pet_type";
+import { setPetTypes } from "@/store/slices/petTypeSlice";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 
 export default function PetTypesPage() {
-  const [petTypes, setPetTypes] = useState<pet_type[]>([]);
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({ id: "", name: "" });
   const [isEditing, setIsEditing] = useState(false);
   const [open, setOpen] = useState(false);
+  const {petTypes, count} = useSelector((state: any) => state.petType);
 
   const fetchPetTypes = async () => {
     try {
       const res = await fetch("/api/pet-types");
       const data = await res.json();
-      setPetTypes(data.pet_types || []);
+      if (data.pet_types) {
+        dispatch(setPetTypes(data.pet_types));
+      }
     } catch (error: any) {
       toast.error("Error fetching pet types: " + error.message);
       console.error("Error fetching pet types:", error);
@@ -89,7 +94,7 @@ export default function PetTypesPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Pet Types</h1>
+          <h1 className="text-2xl font-bold">Pet Types ({count})</h1>
           <p className="text-gray-600">
             Manage the pet types for your products
           </p>
@@ -153,7 +158,7 @@ export default function PetTypesPage() {
               </thead>
               <tbody>
                 {petTypes?.length > 0 ? (
-                  petTypes.map((c) => (
+                  petTypes.map((c: pet_type) => (
                     <tr key={c.id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4 font-mono">{c.id}</td>
                       <td className="py-3 px-4">{c.name}</td>

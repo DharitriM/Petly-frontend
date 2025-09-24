@@ -37,7 +37,7 @@ export default function UsersPage() {
     has_pets: "",
     is_admin: false,
   });
-  const users = useSelector((state: any) => state.user.users);
+  const {users, count} = useSelector((state: any) => state.user);
 
   async function fetchUsers() {
     try {
@@ -46,6 +46,7 @@ export default function UsersPage() {
 
       const res = await fetch("/api/users");
       const data = await res.json();
+      console.log("Users:", data);
       dispatch(setUsers(data));
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -112,7 +113,7 @@ export default function UsersPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Users</h1>
+          <h1 className="text-2xl font-bold">Users ({count})</h1>
           <p className="text-gray-600">Manage user accounts and permissions</p>
         </div>
       </div>

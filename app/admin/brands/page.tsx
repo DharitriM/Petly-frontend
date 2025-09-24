@@ -13,23 +13,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { brand } from "@/lib/interfaces/brand";
 import { supabase } from "@/lib/supabaseClient";
+import { RootState } from "@/store";
+import { setBrands } from "@/store/slices/brandSlice";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 
 export default function BrandsPage() {
-  const [brands, setBrands] = useState<brand[]>([]);
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({ id: "", name: "", logo_url: "" });
   const [isEditing, setIsEditing] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [open, setOpen] = useState(false);
+  const { brands, count } = useSelector((state: RootState) => state.brand);
 
   const fetchBrands = async () => {
-    const res = await fetch("/api/brands");
-    const data = await res.json();
-    setBrands(data.brands || []);
+    try {
+      const res = await fetch("/api/brands");
+      const data = await res.json();
+
+      if (data.brands) {
+        dispatch(setBrands(data.brands));
+      }
+    } catch (error: any) {
+      toast.error("Error fetching brands: " + error.message);
+      console.error("Error fetching brands:", error);
+    }
   };
 
   const uploadImage = async (): Promise<string | null> => {
@@ -113,7 +125,7 @@ export default function BrandsPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Brands</h1>
+          <h1 className="text-2xl font-bold">Brands ({count})</h1>
           <p className="text-gray-600">Manage the Brands for your products</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>

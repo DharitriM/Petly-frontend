@@ -18,19 +18,25 @@ import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/lib/supabaseClient";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { setCategories } from "@/store/slices/categorySlice";
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({ id: "", name: "", image_url: "" });
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const { categories, count} = useSelector((state: RootState) => state.category);
 
   const fetchCategories = async () => {
     try {
       const res = await fetch("/api/categories");
       const data = await res.json();
-      setCategories(data.categories || []);
+      if (data.categories) {
+        dispatch(setCategories(data.categories));
+      }
     } catch (error: any) {
       console.error("Error fetching categories:", error);
       toast.error("Error fetching categories: " + error.message);
@@ -39,7 +45,7 @@ export default function CategoriesPage() {
 
   const uploadImage = async (): Promise<string | null> => {
     try {
-    if (!file) return formData.image_url; // keep old image if editing
+    if (!file) return formData.image_url;
     const ext = file.name.split(".").pop();
     const fileName = `${uuidv4()}.${ext}`;
     const { error } = await supabase.storage
@@ -128,7 +134,7 @@ export default function CategoriesPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Categories</h1>
+          <h1 className="text-2xl font-bold">Categories ({count})</h1>
           <p className="text-gray-600">Manage the Categories</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>

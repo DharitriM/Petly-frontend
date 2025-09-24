@@ -10,6 +10,9 @@ import {
   TrendingUp,
   Eye,
   Loader,
+  Blocks,
+  SwatchBook,
+  PawPrint,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,6 +22,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { User } from "@/lib/interfaces/user";
 import { setUsers } from "@/store/slices/userSlice";
 import { setProducts } from "@/store/slices/productSlice";
+import { setCategories } from "@/store/slices/categorySlice";
+import { setBrands } from "@/store/slices/brandSlice";
+import { setPetTypes } from "@/store/slices/petTypeSlice";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -45,21 +51,24 @@ export default function AdminDashboard() {
     },
     {
       id: "ORD-004",
-      customer: "Alice Brown",
-      amount: "₹67.25",
+      customer: "Alice Williams",
+      amount: "₹79.25",
       status: "Pending",
     },
   ];
 
-  const users = useSelector((state: any) => state.user.users);
-  const products = useSelector((state: any) => state.product.products);
+  const { users, count: userCount } = useSelector((state: any) => state.user);
+  const { count: productCount } = useSelector((state: any) => state.product);
+  const { count: brandCount } = useSelector((state: any) => state.brand);
+  const { count: categoryCount } = useSelector((state: any) => state.category);
+  const { count: petTypeCount } = useSelector((state: any) => state.petType);
   const [recentUsers, setRecentUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-    const stats = [
+  const stats = [
     {
       title: "Total Users",
-      value: users?.length || 0,
+      value: userCount || 0,
       change: "+10%",
       icon: Users,
       color: "text-blue-600",
@@ -67,7 +76,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Products",
-      value: products?.length || 0,
+      value: productCount || 0,
       change: "+5%",
       icon: Package,
       color: "text-green-600",
@@ -80,23 +89,84 @@ export default function AdminDashboard() {
       icon: ShoppingCart,
       color: "text-purple-600",
       bg: "bg-purple-50",
-    }
+    },
+    {
+      title: "Categories",
+      value: categoryCount || 0,
+      change: "+5%",
+      icon: Blocks,
+      color: "text-red-600",
+      bg: "bg-red-50",
+    },
+    {
+      title: "Brands",
+      value: brandCount || 0,
+      change: "+5%",
+      icon: SwatchBook,
+      color: "text-yellow-600",
+      bg: "bg-yellow-50",
+    },
+    {
+      title: "Pet Types",
+      value: petTypeCount || 0,
+      change: "+5%",
+      icon: PawPrint,
+      color: "text-pink-600",
+      bg: "bg-pink-50",
+    },
   ];
 
-  useEffect(() => {
-    async function fetchUsers() {
-      const { data, error } = await supabase.from("user_profiles").select("*");
-      if (!error) dispatch(setUsers(data));
-      else console.error("Error fetching users:", error.message);
+  async function fetchUsers() {
+    try {
+      setLoading(true);
+      // const user = await supabase.auth.getUser();
+      const res = await fetch("/api/users");
+      const data = await res.json();
+      dispatch(setUsers(data));
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching users:", err);
     }
+  }
 
-    async function fetchProducts() {
-      const { data, error } = await supabase.from("product_list").select("*");
-      if (!error) dispatch(setProducts(data));
-      else console.error("Error fetching products:", error.message);
-    }
+  async function fetchProducts() {
+    setLoading(true);
+    const { data, error } = await supabase.from("product_list").select("*");
+    if (!error) dispatch(setProducts(data));
+    else console.error("Error fetching products:", error.message);
+    setLoading(false);
+  }
+
+  async function fetchCategories() {
+    setLoading(true);
+    const { data, error } = await supabase.from("categories").select("*");
+    if (!error) dispatch(setCategories(data));
+    else console.error("Error fetching categories:", error.message);
+    setLoading(false);
+  }
+
+  async function fetchBrands() {
+    setLoading(true);
+    const { data, error } = await supabase.from("brands").select("*");
+    if (!error) dispatch(setBrands(data));
+    else console.error("Error fetching brands:", error.message);
+    setLoading(false);
+  }
+
+  async function fetchPetTypes() {
+    setLoading(true);
+    const { data, error } = await supabase.from("pet_types").select("*");
+    if (!error) dispatch(setPetTypes(data));
+    else console.error("Error fetching pet types:", error.message);
+    setLoading(false);
+  }
+
+  useEffect(() => {
     fetchUsers();
     fetchProducts();
+    fetchCategories();
+    fetchBrands();
+    fetchPetTypes();
   }, []);
 
   useEffect(() => {
@@ -140,7 +210,7 @@ export default function AdminDashboard() {
         return;
       }
 
-      setLoading(false); 
+      setLoading(false);
     };
 
     checkAdmin();
@@ -254,8 +324,12 @@ export default function AdminDashboard() {
                     <p className="text-sm text-gray-600">{user.phone}</p>
                   </div>
                   <div className="text-right">
-                    <Badge className="bg-blue-500 text-white py-1">{user.is_admin ? "Admin / you" : "User"}</Badge>
-                    <p className="text-sm text-gray-500">{new Date(user.created_at).toLocaleDateString()}</p>
+                    <Badge className="bg-blue-500 text-white py-1">
+                      {user.is_admin ? "Admin / you" : "User"}
+                    </Badge>
+                    <p className="text-sm text-gray-500">
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
               ))}
