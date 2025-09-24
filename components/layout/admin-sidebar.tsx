@@ -8,24 +8,17 @@ import {
   LayoutDashboard,
   Users,
   Package,
-  Calendar,
-  Settings,
   ShoppingCart,
-  BarChart3,
-  FileText,
-  Bell,
-  HelpCircle,
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Wrench,
-  Type,
   Blocks,
   SwatchBook,
   PawPrint,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 
 interface AdminSidebarProps {
   className?: string;
@@ -111,6 +104,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
   const handleLogout = () => {
     document.cookie = "admin-token=; path=/; max-age=0";
     localStorage.clear();
+    toast.success("Logged out successfully");
     window.location.href = "/";
   };
 
