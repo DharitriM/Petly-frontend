@@ -20,6 +20,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setProducts } from "@/store/slices/productSlice";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { uploadImage } from "@/lib/utils";
 
 const supabase = require("@/lib/supabaseClient").supabase;
 
@@ -68,19 +69,25 @@ export default function ProductsPage() {
   const uploadImages = async () => {
     const urls: string[] = [];
     for (const file of imageFiles) {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
-      const { error } = await supabase.storage
-        .from("product-images")
-        .upload(fileName, file);
-      if (error) {
-        console.error("Image upload failed:", error.message);
+      const imageUrl = await uploadImage(file, "product-images");
+      // const fileExt = file.name.split(".").pop();
+      // const fileName = `${uuidv4()}.${fileExt}`;
+      // const { error } = await supabase.storage
+      //   .from("product-images")
+      //   .upload(fileName, file);
+      // if (error) {
+      //   console.error("Image upload failed:", error.message);
+      //   continue;
+      // }
+      // const { data } = supabase.storage
+      //   .from("product-images")
+      //   .getPublicUrl(fileName);
+
+      if (!imageUrl) {
+        console.error("Image upload failed");
         continue;
       }
-      const { data } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(fileName);
-      urls.push(data.publicUrl);
+      urls.push(imageUrl);
     }
     return urls;
   };

@@ -25,6 +25,8 @@ import { setProducts } from "@/store/slices/productSlice";
 import { setCategories } from "@/store/slices/categorySlice";
 import { setBrands } from "@/store/slices/brandSlice";
 import { setPetTypes } from "@/store/slices/petTypeSlice";
+import { fetchBrands, fetchCategories, fetchPetTypes, fetchProducts, fetchUsers } from "@/lib/apiUtils";
+import { RootState } from "@/store";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -57,12 +59,12 @@ export default function AdminDashboard() {
     },
   ];
 
-  const { users, count: userCount } = useSelector((state: any) => state.user);
-  const { count: productCount } = useSelector((state: any) => state.product);
-  const { count: brandCount } = useSelector((state: any) => state.brand);
-  const { count: categoryCount } = useSelector((state: any) => state.category);
-  const { count: petTypeCount } = useSelector((state: any) => state.petType);
-  const [recentUsers, setRecentUsers] = useState([]);
+  const { users, count: userCount } = useSelector((state: RootState) => state.user);
+  const { count: productCount } = useSelector((state: RootState) => state.product);
+  const { count: brandCount } = useSelector((state: RootState) => state.brand);
+  const { count: categoryCount } = useSelector((state: RootState) => state.category);
+  const { count: petTypeCount } = useSelector((state: RootState) => state.petType);
+  const [recentUsers, setRecentUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   const stats = [
@@ -116,58 +118,13 @@ export default function AdminDashboard() {
     },
   ];
 
-  async function fetchUsers() {
-    try {
-      setLoading(true);
-      // const user = await supabase.auth.getUser();
-      const res = await fetch("/api/users");
-      const data = await res.json();
-      dispatch(setUsers(data));
-      setLoading(false);
-    } catch (err) {
-      console.error("Error fetching users:", err);
-    }
-  }
-
-  async function fetchProducts() {
-    setLoading(true);
-    const { data, error } = await supabase.from("product_list").select("*");
-    if (!error) dispatch(setProducts(data));
-    else console.error("Error fetching products:", error.message);
-    setLoading(false);
-  }
-
-  async function fetchCategories() {
-    setLoading(true);
-    const { data, error } = await supabase.from("categories").select("*");
-    if (!error) dispatch(setCategories(data));
-    else console.error("Error fetching categories:", error.message);
-    setLoading(false);
-  }
-
-  async function fetchBrands() {
-    setLoading(true);
-    const { data, error } = await supabase.from("brands").select("*");
-    if (!error) dispatch(setBrands(data));
-    else console.error("Error fetching brands:", error.message);
-    setLoading(false);
-  }
-
-  async function fetchPetTypes() {
-    setLoading(true);
-    const { data, error } = await supabase.from("pet_types").select("*");
-    if (!error) dispatch(setPetTypes(data));
-    else console.error("Error fetching pet types:", error.message);
-    setLoading(false);
-  }
-
   useEffect(() => {
-    fetchUsers();
-    fetchProducts();
-    fetchCategories();
-    fetchBrands();
-    fetchPetTypes();
-  }, []);
+    fetchUsers(dispatch);
+    fetchProducts(dispatch);
+    fetchCategories(dispatch);
+    fetchBrands(dispatch);
+    fetchPetTypes(dispatch);
+  }, [dispatch]);
 
   useEffect(() => {
     users.length > 0 && setRecentUsers(users.slice(0, 5));

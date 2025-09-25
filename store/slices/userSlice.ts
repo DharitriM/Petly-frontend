@@ -17,7 +17,6 @@ const userSlice = createSlice({
   reducers: {
     setUsers: (state, action: PayloadAction<User[]>) => {
       state.users = action.payload;
-      console.log("setUsers", action.payload);
       state.count = action.payload.length;
     },
     addUser: (state, action: PayloadAction<User>) => {

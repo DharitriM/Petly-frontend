@@ -14,13 +14,12 @@ import {
 } from "@/components/ui/dialog";
 import { Category } from "@/lib/interfaces/category";
 import Image from "next/image";
-import { v4 as uuidv4 } from "uuid";
-import { supabase } from "@/lib/supabaseClient";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setCategories } from "@/store/slices/categorySlice";
+import { uploadImage } from "@/lib/utils";
 
 export default function CategoriesPage() {
   const dispatch = useDispatch();
@@ -43,39 +42,39 @@ export default function CategoriesPage() {
     }
   };
 
-  const uploadImage = async (): Promise<string | null> => {
-    try {
-    if (!file) return formData.image_url;
-    const ext = file.name.split(".").pop();
-    const fileName = `${uuidv4()}.${ext}`;
-    const { error } = await supabase.storage
-      .from("category-images")
-      .upload(fileName, file);
+  // const uploadImage = async (): Promise<string | null> => {
+  //   try {
+  //   if (!file) return formData.image_url;
+  //   const ext = file.name.split(".").pop();
+  //   const fileName = `${uuidv4()}.${ext}`;
+  //   const { error } = await supabase.storage
+  //     .from("category-images")
+  //     .upload(fileName, file);
 
-    if (error) {
-      console.error("Upload failed:", error.message);
-      toast.error("Image upload failed: " + error.message);
-      return null;
-    }
+  //   if (error) {
+  //     console.error("Upload failed:", error.message);
+  //     toast.error("Image upload failed: " + error.message);
+  //     return null;
+  //   }
 
-    const { data } = supabase.storage
-      .from("category-images")
-      .getPublicUrl(fileName);
+  //   const { data } = supabase.storage
+  //     .from("category-images")
+  //     .getPublicUrl(fileName);
 
-    return data.publicUrl;
-  } catch (error: any) {
-      console.error("Upload failed:", error);
-      toast.error("Image upload failed: " + error.message);
-      return null;
-    }
-  };
+  //   return data.publicUrl;
+  // } catch (error: any) {
+  //     console.error("Upload failed:", error);
+  //     toast.error("Image upload failed: " + error.message);
+  //     return null;
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
       const method = formData.id ? "PUT" : "POST";
 
-      const imageUrl = await uploadImage();
+      const imageUrl = await uploadImage(file, "category-images");
       if (!imageUrl && !isEditing) {
         toast.error("Image upload is required.");
         return;

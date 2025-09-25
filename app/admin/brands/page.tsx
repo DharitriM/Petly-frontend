@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { brand } from "@/lib/interfaces/brand";
 import { supabase } from "@/lib/supabaseClient";
+import { uploadImage } from "@/lib/utils";
 import { RootState } from "@/store";
 import { setBrands } from "@/store/slices/brandSlice";
 import { Edit, Plus, Trash2 } from "lucide-react";
@@ -20,7 +21,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { v4 as uuidv4 } from "uuid";
 
 export default function BrandsPage() {
   const dispatch = useDispatch();
@@ -44,38 +44,38 @@ export default function BrandsPage() {
     }
   };
 
-  const uploadImage = async (): Promise<string | null> => {
-    try {
-      if (!file) return formData.logo_url; // keep old image if editing
-      const ext = file.name.split(".").pop();
-      const fileName = `${uuidv4()}.${ext}`;
-      const { error } = await supabase.storage
-        .from("brand-images") // ✅ your Supabase bucket
-        .upload(fileName, file);
+  // const uploadImage = async (): Promise<string | null> => {
+  //   try {
+  //     if (!file) return formData.logo_url; // keep old image if editing
+  //     const ext = file.name.split(".").pop();
+  //     const fileName = `${uuidv4()}.${ext}`;
+  //     const { error } = await supabase.storage
+  //       .from("brand-images") // ✅ your Supabase bucket
+  //       .upload(fileName, file);
 
-      if (error) {
-        console.error("Upload failed:", error.message);
-        return null;
-      }
+  //     if (error) {
+  //       console.error("Upload failed:", error.message);
+  //       return null;
+  //     }
 
-      const { data } = supabase.storage
-        .from("brand-images")
-        .getPublicUrl(fileName);
+  //     const { data } = supabase.storage
+  //       .from("brand-images")
+  //       .getPublicUrl(fileName);
 
-      return data.publicUrl;
-    } catch (error: any) {
-      toast.error("Image upload failed: " + error.message);
-      console.error("Upload failed:", error.message);
-      return null;
-    }
-  };
+  //     return data.publicUrl;
+  //   } catch (error: any) {
+  //     toast.error("Image upload failed: " + error.message);
+  //     console.error("Upload failed:", error.message);
+  //     return null;
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
       const method = formData.id ? "PUT" : "POST";
 
-      const imageUrl = await uploadImage();
+      const imageUrl = await uploadImage(file, "brand-images");
       const updatedFormData = { ...formData, logo_url: imageUrl };
 
       await fetch("/api/brands", {

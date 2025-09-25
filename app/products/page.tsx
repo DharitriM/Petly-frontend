@@ -163,10 +163,10 @@ export default function ProductsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="featured">Featured</SelectItem>
+              <SelectItem value="newest">Latest</SelectItem>
               <SelectItem value="price-low">Price: Low to High</SelectItem>
               <SelectItem value="price-high">Price: High to Low</SelectItem>
               <SelectItem value="rating">Highest Rated</SelectItem>
-              <SelectItem value="newest">Newest</SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -292,9 +292,9 @@ export default function ProductsPage() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      className="rounded-full p-2"
+                      className="rounded-full px-2"
                     >
-                      <Heart className="w-4 h-4" />
+                      <Heart className="w-4" />
                     </Button>
                   </div>
                 </div>

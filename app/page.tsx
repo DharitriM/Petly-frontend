@@ -18,41 +18,48 @@ import { useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { setProducts } from "@/store/slices/productSlice";
 import { Product } from "@/lib/interfaces/product";
-
-const categories = [
-  { name: "Toys", icon: "🎾", count: "120+ items" },
-  { name: "Food", icon: "🍖", count: "85+ items" },
-  { name: "Accessories", icon: "🎀", count: "95+ items" },
-  { name: "Home", icon: "🏠", count: "60+ items" },
-  { name: "Health", icon: "💊", count: "45+ items" },
-  { name: "Grooming", icon: "🛁", count: "35+ items" },
-];
+import { Category } from "@/lib/interfaces/category";
+import { pet_type } from "@/lib/interfaces/pet_type";
+import { brand } from "@/lib/interfaces/brand";
+import {
+  fetchBrands,
+  fetchCategories,
+  fetchPetTypes,
+  fetchProducts,
+  fetchUsers,
+} from "@/lib/apiUtils";
+import { RootState } from "@/store";
 
 export default function HomePage() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const products = useSelector((state: any) => state.product.products);
-  const searchTerm = useSelector((state: any) => state.search.searchTerm);
+  const products = useSelector((state: RootState) => state.product.products);
+  const searchTerm = useSelector((state: RootState) => state.search.searchTerm);
+  const categories = useSelector(
+    (state: RootState) => state.category.categories
+  );
+  const petTypes = useSelector((state: RootState) => state.petType.petTypes);
+  const brands = useSelector((state: RootState) => state.brand.brands);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const { data } = await supabase.from("product_list").select("*");
-      if (data) {
-        dispatch(setProducts(data));
-      }
-    };
-    fetchProducts();
-  }, []);
+    fetchUsers(dispatch);
+    fetchProducts(dispatch);
+    fetchCategories(dispatch);
+    fetchBrands(dispatch);
+    fetchPetTypes(dispatch);
+  }, [dispatch]);
+
+  const productList = Array.isArray(products) ? products : products || [];
 
   const featuredProducts =
-    products?.length > 0 && searchTerm
-      ? products.filter(
+    productList.length > 0 && searchTerm
+      ? productList.filter(
           (product: Product) =>
             product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             product.brand?.name.toLowerCase().includes(searchTerm.toLowerCase())
         )
-      : products.slice(0, 4);
+      : productList.slice(0, 4);
 
   return (
     <div className="min-h-screen">
@@ -153,30 +160,111 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Pet Types Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Pet Categories</h2>
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
+              <b>Petly</b> serves for these pet categories
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-6">
+            {petTypes?.length > 0 &&
+              petTypes.map((pet: pet_type, index: number) => (
+                <Link
+                  key={index}
+                  href={`/products?category=${pet?.name?.toLowerCase()}`}
+                >
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer group w-40 h-40 flex items-center justify-center">
+                    <CardContent className="flex flex-col items-center justify-center text-center pb-3">
+                      <div className="my-4 group-hover:scale-110 transition-transform">
+                        <Image
+                          src={pet?.image_url || "/placeholder.svg"}
+                          alt={pet.name}
+                          width={96}
+                          height={96}
+                          className="w-24 h-24 object-contain"
+                        />
+                      </div>
+                      <h3 className="font-semibold mb-1">{pet.name}</h3>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+          </div>
+        </div>
+      </section>
+
       {/* Categories Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Shop by Category</h2>
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">Find exactly what your pet needs</p>
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
+              Find exactly what your pet needs
+            </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {categories.map((category, index) => (
-              <Link
-                key={index}
-                href={`/products?category=${category.name.toLowerCase()}`}
-              >
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
-                  <CardContent className="p-6 text-center">
-                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
-                      {category.icon}
-                    </div>
-                    <h3 className="font-semibold mb-1">{category.name}</h3>
-                    <p className="text-sm text-gray-500">{category.count}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+          <div className="flex flex-wrap justify-center gap-6">
+            {categories.length > 0 &&
+              categories.map((category: Category, index: number) => (
+                <Link
+                  key={index}
+                  href={`/products?category=${category.name.toLowerCase()}`}
+                >
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer group w-60 h-55 flex items-center justify-center">
+                    <CardContent className="flex flex-col items-center justify-center text-center pb-3">
+                      <div className="my-4 group-hover:scale-110 transition-transform">
+                        <Image
+                          src={category?.image_url || "/placeholder.svg"}
+                          alt={category.name}
+                          width={96}
+                          height={96}
+                          className="w-24 h-24 object-contain"
+                        />
+                      </div>
+                      <h3 className="font-semibold mb-1">{category.name}</h3>
+                      <p className="text-sm text-gray-500">
+                        {category.product_count}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Brands Section */}
+      <section className="py-10 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Our Brands</h2>
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
+              Trusted Brands
+            </p>
+          </div>
+          <div className="overflow-hidden relative">
+            <div className="flex animate-marquee gap-2">
+              {[...brands, ...brands].map((brand: brand, index: number) => (
+                <div
+                  key={index}
+                  className="relative w-40 h-24 flex-shrink-0 rounded-lg overflow-hidden shadow-md group"
+                >
+                  <Image
+                    src={brand.logo_url || "/placeholder.svg"}
+                    alt={brand.name}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <span className="text-white font-semibold text-lg">
+                      {brand.name}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -199,7 +287,11 @@ export default function HomePage() {
                 >
                   <div className="relative overflow-hidden">
                     <Image
-                      src={product?.images?.length > 0 ? product.images[0] : "/placeholder.svg"}
+                      src={
+                        product?.images?.length > 0
+                          ? product.images[0]
+                          : "/placeholder.svg"
+                      }
                       alt={product.name}
                       width={300}
                       height={300}
@@ -234,8 +326,12 @@ export default function HomePage() {
                       </span> */}
                     </div>
                     <h3 className="font-semibold mb-2">{product.name}</h3>
-                    <h5 className="mb-2 text-gray-600">{product.brand?.name}</h5>
-                    <p className="text-sm text-gray-600">description</p>
+                    <h5 className="mb-2 text-gray-600">
+                      {product.brand?.name}
+                    </h5>
+                    <p className="text-sm text-gray-600">
+                      {product.description}
+                    </p>
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg font-bold text-green-600">
                         ₹{product.price}
@@ -256,7 +352,11 @@ export default function HomePage() {
                 </Card>
               ))
             ) : (
-              <p className="text-gray-600 text-center">No products found 😞.</p>
+              <div className="col-span-4">
+                <p className="text-gray-600 text-center">
+                  No featured products found 😞
+                </p>
+              </div>
             )}
           </div>
           <div className="text-center mt-8">
