@@ -17,11 +17,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { RootState } from "@/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setProducts } from "@/store/slices/productSlice";
-import { toast } from "sonner";
-import { setPetTypes } from "@/store/slices/petTypeSlice";
-import { setBrands } from "@/store/slices/brandSlice";
-import { setCategories } from "@/store/slices/categorySlice";
+import { fetchBrands, fetchCategories, fetchPetTypes, fetchProducts } from "@/lib/apiUtils";
 
 
 export default function ProductsPage() {
@@ -51,63 +47,11 @@ export default function ProductsPage() {
     return matchesSearch && matchesCategory && matchesBrand && matchesPetType;
   });
 
-  const fetchProducts = async () => {
-    try {
-      const res = await fetch("/api/products");
-      const data = await res.json();
-      if (data.products) {
-        dispatch(setProducts(data.products));
-      }
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-      toast.error("Failed to fetch products");
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch("/api/categories");
-      const data = await res.json();
-      if (data.categories) {
-        dispatch(setCategories(data.categories));
-      }
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-      toast.error("Failed to fetch categories");
-    }
-  };
-
-  const fetchBrands = async () => {
-    try {
-      const res = await fetch("/api/brands");
-      const data = await res.json();
-      if (data.brands) {
-        dispatch(setBrands(data.brands));
-      }
-    } catch (error) {
-      console.error("Failed to fetch brands:", error);
-      toast.error("Failed to fetch brands");
-    }
-  };
-
-  const fetchPetTypes = async () => {
-    try {
-      const res = await fetch("/api/pet-types");
-      const data = await res.json();
-      if (data.pet_types) {
-        dispatch(setPetTypes(data.pet_types));
-      }
-    } catch (error) {
-      console.error("Failed to fetch pet types:", error);
-      toast.error("Failed to fetch pet types");
-    }
-  };
-
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-    fetchBrands();
-    fetchPetTypes();
+    fetchProducts(dispatch);
+    fetchCategories(dispatch);
+    fetchBrands(dispatch);
+    fetchPetTypes(dispatch);
   }, []);
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {

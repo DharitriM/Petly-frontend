@@ -18,8 +18,8 @@ import { Edit, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { setCategories } from "@/store/slices/categorySlice";
 import { uploadImage } from "@/lib/utils";
+import { fetchCategories } from "@/lib/apiUtils";
 
 export default function CategoriesPage() {
   const dispatch = useDispatch();
@@ -28,46 +28,6 @@ export default function CategoriesPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const { categories, count} = useSelector((state: RootState) => state.category);
-
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch("/api/categories");
-      const data = await res.json();
-      if (data.categories) {
-        dispatch(setCategories(data.categories));
-      }
-    } catch (error: any) {
-      console.error("Error fetching categories:", error);
-      toast.error("Error fetching categories: " + error.message);
-    }
-  };
-
-  // const uploadImage = async (): Promise<string | null> => {
-  //   try {
-  //   if (!file) return formData.image_url;
-  //   const ext = file.name.split(".").pop();
-  //   const fileName = `${uuidv4()}.${ext}`;
-  //   const { error } = await supabase.storage
-  //     .from("category-images")
-  //     .upload(fileName, file);
-
-  //   if (error) {
-  //     console.error("Upload failed:", error.message);
-  //     toast.error("Image upload failed: " + error.message);
-  //     return null;
-  //   }
-
-  //   const { data } = supabase.storage
-  //     .from("category-images")
-  //     .getPublicUrl(fileName);
-
-  //   return data.publicUrl;
-  // } catch (error: any) {
-  //     console.error("Upload failed:", error);
-  //     toast.error("Image upload failed: " + error.message);
-  //     return null;
-  //   }
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     try {
@@ -92,7 +52,7 @@ export default function CategoriesPage() {
       setOpen(false);
       setIsEditing(false);
       toast.success(`Category ${formData.id ? "updated" : "added"} successfully`);
-      fetchCategories();
+      fetchCategories(dispatch);
     } catch (error: any) {
       console.error("Error saving category:", error);
       toast.error("Error saving category: " + error.message);
@@ -118,7 +78,7 @@ export default function CategoriesPage() {
         body: JSON.stringify({ id }),
       });
       toast.success("Category deleted successfully");
-      fetchCategories();
+      fetchCategories(dispatch);
     } catch (error: any) {
       console.error("Error deleting category:", error);
       toast.error("Error deleting category: " + error.message);
@@ -126,7 +86,7 @@ export default function CategoriesPage() {
   };
 
   useEffect(() => {
-    fetchCategories();
+    fetchCategories(dispatch);
   }, []);
 
   return (

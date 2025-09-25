@@ -7,7 +7,6 @@ import { setPetTypes } from "@/store/slices/petTypeSlice";
 
 export async function fetchUsers(dispatch: any) {
     try {
-        // const user = await supabase.auth.getUser();
         const res = await fetch("/api/users");
         const data = await res.json();
         dispatch(setUsers(data));

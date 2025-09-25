@@ -11,11 +11,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { fetchBrands } from "@/lib/apiUtils";
 import { brand } from "@/lib/interfaces/brand";
-import { supabase } from "@/lib/supabaseClient";
 import { uploadImage } from "@/lib/utils";
 import { RootState } from "@/store";
-import { setBrands } from "@/store/slices/brandSlice";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -29,46 +28,6 @@ export default function BrandsPage() {
   const [file, setFile] = useState<File | null>(null);
   const [open, setOpen] = useState(false);
   const { brands, count } = useSelector((state: RootState) => state.brand);
-
-  const fetchBrands = async () => {
-    try {
-      const res = await fetch("/api/brands");
-      const data = await res.json();
-
-      if (data.brands) {
-        dispatch(setBrands(data.brands));
-      }
-    } catch (error: any) {
-      toast.error("Error fetching brands: " + error.message);
-      console.error("Error fetching brands:", error);
-    }
-  };
-
-  // const uploadImage = async (): Promise<string | null> => {
-  //   try {
-  //     if (!file) return formData.logo_url; // keep old image if editing
-  //     const ext = file.name.split(".").pop();
-  //     const fileName = `${uuidv4()}.${ext}`;
-  //     const { error } = await supabase.storage
-  //       .from("brand-images") // ✅ your Supabase bucket
-  //       .upload(fileName, file);
-
-  //     if (error) {
-  //       console.error("Upload failed:", error.message);
-  //       return null;
-  //     }
-
-  //     const { data } = supabase.storage
-  //       .from("brand-images")
-  //       .getPublicUrl(fileName);
-
-  //     return data.publicUrl;
-  //   } catch (error: any) {
-  //     toast.error("Image upload failed: " + error.message);
-  //     console.error("Upload failed:", error.message);
-  //     return null;
-  //   }
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     try {
@@ -89,7 +48,7 @@ export default function BrandsPage() {
       setOpen(false);
       setIsEditing(false);
       toast.success(`Brand ${formData.id ? "updated" : "added"} successfully`);
-      fetchBrands();
+      fetchBrands(dispatch);
     } catch (error: any) {
       toast.error("Error: " + error.message);
       console.error("Error submitting form:", error);
@@ -114,11 +73,11 @@ export default function BrandsPage() {
       body: JSON.stringify({ id }),
     });
     toast.success("Brand deleted successfully");
-    fetchBrands();
+    fetchBrands(dispatch);
   };
 
   useEffect(() => {
-    fetchBrands();
+    fetchBrands(dispatch);
   }, []);
 
   return (

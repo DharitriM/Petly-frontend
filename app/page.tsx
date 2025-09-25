@@ -15,8 +15,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { setProducts } from "@/store/slices/productSlice";
 import { Product } from "@/lib/interfaces/product";
 import { Category } from "@/lib/interfaces/category";
 import { pet_type } from "@/lib/interfaces/pet_type";

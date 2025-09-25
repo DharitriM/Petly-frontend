@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { Search, Plus, Edit, Trash2, Pencil } from "lucide-react";
+import { Search, Plus, Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
 import {
   Dialog,
@@ -19,8 +18,8 @@ import { RootState } from "@/store";
 import { useSelector, useDispatch } from "react-redux";
 import { setProducts } from "@/store/slices/productSlice";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { uploadImage } from "@/lib/utils";
+import { fetchProducts } from "@/lib/apiUtils";
 
 const supabase = require("@/lib/supabaseClient").supabase;
 
@@ -48,40 +47,15 @@ export default function ProductsPage() {
     pet_type_id: "",
   });
   const { products, count } = useSelector((state: RootState) => state.product);
- 
-  const fetchProducts = async () => {
-    try {
-      const res = await fetch("/api/products");
-      const data = await res.json();
-      if (data.products) {
-        dispatch(setProducts(data.products));
-      }
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-      toast.error("Failed to fetch products");
-    }
-  };
 
   useEffect(() => {
-    fetchProducts();
+    fetchProducts(dispatch);
   }, []);
 
   const uploadImages = async () => {
     const urls: string[] = [];
     for (const file of imageFiles) {
       const imageUrl = await uploadImage(file, "product-images");
-      // const fileExt = file.name.split(".").pop();
-      // const fileName = `${uuidv4()}.${fileExt}`;
-      // const { error } = await supabase.storage
-      //   .from("product-images")
-      //   .upload(fileName, file);
-      // if (error) {
-      //   console.error("Image upload failed:", error.message);
-      //   continue;
-      // }
-      // const { data } = supabase.storage
-      //   .from("product-images")
-      //   .getPublicUrl(fileName);
 
       if (!imageUrl) {
         console.error("Image upload failed");

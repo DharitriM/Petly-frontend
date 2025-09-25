@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { fetchPetTypes } from "@/lib/apiUtils";
 import { pet_type } from "@/lib/interfaces/pet_type";
 import { uploadImage } from "@/lib/utils";
-import { setPetTypes } from "@/store/slices/petTypeSlice";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -27,20 +27,6 @@ export default function PetTypesPage() {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const { petTypes, count } = useSelector((state: any) => state.petType);
-
-  const fetchPetTypes = async () => {
-    try {
-      const res = await fetch("/api/pet-types");
-      const data = await res.json();
-
-      if (data.pet_types) {
-        dispatch(setPetTypes(data.pet_types));
-      }
-    } catch (error: any) {
-      toast.error("Error fetching pet types: " + error.message);
-      console.error("Error fetching pet types:", error);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     try {
@@ -62,7 +48,7 @@ export default function PetTypesPage() {
       toast.success(
         `Pet type ${formData.id ? "updated" : "added"} successfully`
       );
-      fetchPetTypes();
+      fetchPetTypes(dispatch);
     } catch (error: any) {
       toast.error("Error submitting form: " + error.message);
       console.error("Error submitting form:", error);
@@ -88,7 +74,7 @@ export default function PetTypesPage() {
         body: JSON.stringify({ id }),
       });
       toast.success("Pet type deleted successfully");
-      fetchPetTypes();
+      fetchPetTypes(dispatch);
     } catch (error: any) {
       toast.error("Error deleting pet type: " + error.message);
       console.error("Error deleting pet type:", error);
@@ -96,7 +82,7 @@ export default function PetTypesPage() {
   };
 
   useEffect(() => {
-    fetchPetTypes();
+    fetchPetTypes(dispatch);
   }, []);
 
   return (

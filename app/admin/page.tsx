@@ -20,11 +20,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useDispatch, useSelector } from "react-redux";
 import { User } from "@/lib/interfaces/user";
-import { setUsers } from "@/store/slices/userSlice";
-import { setProducts } from "@/store/slices/productSlice";
-import { setCategories } from "@/store/slices/categorySlice";
-import { setBrands } from "@/store/slices/brandSlice";
-import { setPetTypes } from "@/store/slices/petTypeSlice";
 import { fetchBrands, fetchCategories, fetchPetTypes, fetchProducts, fetchUsers } from "@/lib/apiUtils";
 import { RootState } from "@/store";
 
