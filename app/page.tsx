@@ -128,7 +128,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-12 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center space-y-4">
@@ -159,7 +159,7 @@ export default function HomePage() {
       </section>
 
       {/* Pet Types Section */}
-      <section className="py-16">
+      <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Pet Categories</h2>
@@ -195,7 +195,7 @@ export default function HomePage() {
       </section>
 
       {/* Categories Section */}
-      <section className="py-16">
+      <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Shop by Category</h2>
@@ -247,7 +247,7 @@ export default function HomePage() {
               {[...brands, ...brands].map((brand: brand, index: number) => (
                 <div
                   key={index}
-                  className="relative w-40 h-24 flex-shrink-0 rounded-lg overflow-hidden shadow-md group"
+                  className="relative w-36 h-20 flex-shrink-0 rounded-lg overflow-hidden shadow-md group"
                 >
                   <Image
                     src={brand.logo_url || "/placeholder.svg"}
@@ -256,8 +256,8 @@ export default function HomePage() {
                     className="object-cover group-hover:scale-110 transition-transform"
                   />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <span className="text-white font-semibold text-lg">
-                      {brand.name}
+                    <span className="text-white font-mono font-bold uppercase group-hover:text-pink-400 text-xl tracking-widest">
+                      {brand.name ? brand.name : "Brand"}
                     </span>
                   </div>
                 </div>
@@ -268,7 +268,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-12 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Featured Products</h2>
@@ -371,7 +371,7 @@ export default function HomePage() {
       </section>
 
       {/* Services Preview */}
-      <section className="py-16">
+      <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Our Services</h2>
@@ -417,7 +417,7 @@ export default function HomePage() {
       </section>
 
       {/* Newsletter */}
-      <section className="py-16 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+      <section className="py-12 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
           <p className="text-xl mb-8 opacity-80">

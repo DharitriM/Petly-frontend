@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       original_price,
       weight,
       dimensions,
-      quantity, // frontend sends "quantity"
+      quantity,
       images,
       category_id,
       brand_id,

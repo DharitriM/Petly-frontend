@@ -175,7 +175,7 @@ export default function ProductsPage() {
                   onClick={() => setSelectedPetType(type.id)}
                 >
                   {type.name}
-                  {/* <span className="text-xs text-gray-500">({type || 0})</span> */}
+                  <span className="text-xs text-gray-500">({type.product_count || 0})</span>
                 </Button>
               ))}
             </div>

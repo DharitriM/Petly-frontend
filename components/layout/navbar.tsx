@@ -106,7 +106,7 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-white border-b shadow-sm">
       {isAdmin ? (
-        <div className="container w-[2110px] max-w-[3000px] px-8">
+        <div className="container max-w-[3000px] px-8">
           <div className="flex items-center justify-between h-[7.8vh]">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-gradient-to-r from-indigo-300 to-pink-300 rounded-full flex items-center justify-center">
