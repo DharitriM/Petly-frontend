@@ -233,7 +233,6 @@ export default function ProductsPage() {
                 }
               />
 
-              {/* Category, Brand, Pet Type will be dropdowns */}
               <DropdownField
                 label="Category"
                 value={newProduct.category_id}
