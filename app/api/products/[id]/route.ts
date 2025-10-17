@@ -22,3 +22,38 @@ export async function GET(
 
     return NextResponse.json(data, { status: 200 });
 }
+
+export async function PUT(
+    req: Request,
+    { params }: { params: { id?: string } }
+) {
+    const { id } = params;
+    const body = await req.json();
+    const { data, error } = await supabaseServer
+        .from("product_list")
+        .update(body)
+        .eq("id", id)
+        .select()
+        .single();
+    if (error) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    return NextResponse.json(data, { status: 200 });
+}
+
+export async function DELETE(
+    req: Request,
+    { params }: { params: { id?: string } }
+) {
+    const { id } = params;
+    const { data, error } = await supabaseServer
+        .from("product_list")
+        .delete()
+        .eq("id", id)
+        .select()
+        .single();
+    if (error) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    return NextResponse.json(data, { status: 200 });
+}
