@@ -14,7 +14,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Product } from "@/lib/interfaces/product";
 import { Category } from "@/lib/interfaces/category";
 import { pet_type } from "@/lib/interfaces/pet_type";
@@ -59,12 +59,56 @@ export default function HomePage() {
         )
       : productList.slice(0, 4);
 
+  const marqueeContainerRef = useRef<HTMLDivElement | null>(null);
+  const sequenceRef = useRef<HTMLDivElement | null>(null);
+  const [repeatCount, setRepeatCount] = useState<number>(2);
+  const [trackWidth, setTrackWidth] = useState<number>(0);
+
+  // compute repeatedBrands array for rendering (keeps it stable)
+  const repeatedBrands = useMemo(() => {
+    if (!brands || brands.length === 0) return [];
+    const flat: brand[] = [];
+    for (let i = 0; i < repeatCount; i++) {
+      flat.push(...brands);
+    }
+    return flat;
+  }, [brands, repeatCount]);
+
+  useEffect(() => {
+    if (!brands || brands.length === 0) return;
+    const container = marqueeContainerRef.current;
+    const seq = sequenceRef.current;
+    if (!container || !seq) return;
+
+    const compute = () => {
+      const containerWidth = container.offsetWidth || 0;
+      const sequenceWidth = seq.scrollWidth || 0;
+      if (sequenceWidth === 0) return;
+      // need total track >= containerWidth * 2 and even repeat count to make two identical halves
+      let repeats = Math.ceil((containerWidth * 2) / sequenceWidth);
+      if (repeats < 2) repeats = 2;
+      if (repeats % 2 !== 0) repeats += 1;
+      setRepeatCount(repeats);
+      setTrackWidth(sequenceWidth * repeats);
+    };
+
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(container);
+    ro.observe(seq);
+    window.addEventListener("load", compute);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("load", compute);
+    };
+  }, [brands, marqueeContainerRef.current, sequenceRef.current]);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-orange-400 via-pink-400 to-purple-500 text-white">
         <div className="container mx-auto px-4 py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center px-4">
             <div className="space-y-6">
               <Badge className="p-2 align-middle font-mono text-xl bg-white/20 text-white border-white/30 hover:bg-pink-200 hover:text-purple-800 border-2">
                 🐾Welcome to PetLy
@@ -106,7 +150,7 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative flex justify-center lg:justify-center">
               <Image
                 // src="/hero.jpg?height=600&width=600"
                 // src="/heroBlueBg.jpg?height=600&width=600"
@@ -116,10 +160,10 @@ export default function HomePage() {
                 height={600}
                 className="rounded-2xl shadow-2xl"
               />
-              <div className="absolute -top-2 -right-[-7rem] bg-yellow-400 text-black p-4 rounded-full animate-bounce">
+              <div className="absolute -top-2 -right-0 bg-pink-500 text-white p-4 rounded-full animate-bounce">
                 <span className="text-2xl">🐕</span>
               </div>
-              <div className="absolute -bottom-4 -left-4 bg-pink-400 text-white p-4 rounded-full animate-bounce">
+              <div className="absolute -bottom-4 -left-0 bg-yellow-500 text-black p-4 rounded-full animate-bounce">
                 <span className="text-2xl">🐱</span>
               </div>
             </div>
@@ -234,7 +278,7 @@ export default function HomePage() {
       </section>
 
       {/* Brands Section */}
-      <section className="py-10 bg-white">
+      {/* <section className="py-10 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Our Brands</h2>
@@ -263,8 +307,133 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+            
           </div>
         </div>
+      </section> */}
+      <section className="py-10 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Our Brands</h2>
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
+              Trusted Brands
+            </p>
+          </div>
+
+          <div ref={marqueeContainerRef} className="overflow-hidden relative">
+            {brands?.length > 0 ? (
+              <>
+                {/* hidden single-sequence used for measurement */}
+                <div
+                  ref={sequenceRef}
+                  className="marquee__sequence"
+                  aria-hidden="true"
+                >
+                  {brands.map((b: brand, i: number) => (
+                    <div
+                      key={`seq-${i}`}
+                      className="relative w-36 h-20 flex-shrink-0 rounded-lg overflow-hidden shadow-md group"
+                    >
+                      <Image
+                        src={b.logo_url || "/placeholder.svg"}
+                        alt={b.name || "brand"}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform"
+                      />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <span className="text-white font-mono font-bold uppercase group-hover:text-pink-400 text-xl tracking-widest">
+                          {b.name ? b.name : "Brand"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* visible animated track built from repeated copies (even count) */}
+                <div className="marquee">
+                  <div
+                    className="marquee__track"
+                    style={{
+                      animationDuration: `${Math.max(
+                        8,
+                        Math.round((trackWidth / 80) * 10) / 10
+                      )}s`,
+                    }}
+                  >
+                    {repeatedBrands.map((b: brand, idx: number) => (
+                      <div
+                        key={`rep-${idx}`}
+                        className="relative w-36 h-20 flex-shrink-0 rounded-lg overflow-hidden shadow-md group"
+                      >
+                        <Image
+                          src={b.logo_url || "/placeholder.svg"}
+                          alt={b.name || "brand"}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <span className="text-white font-mono font-bold uppercase group-hover:text-pink-400 text-xl tracking-widest">
+                            {b.name ? b.name : "Brand"}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-center py-6">
+                <div className="text-gray-600">No brands available</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <style jsx>{`
+          .marquee {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+          }
+
+          /* hidden measuring sequence */
+          .marquee__sequence {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            position: absolute;
+            left: 0;
+            top: 0;
+            visibility: hidden;
+            pointer-events: none;
+            white-space: nowrap;
+          }
+
+          /* visible animated track */
+          .marquee__track {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            will-change: transform;
+            animation-name: marquee;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            white-space: nowrap;
+          }
+
+          .marquee__track > :global(div) {
+            flex: 0 0 auto;
+          }
+
+          @keyframes marquee {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
+          }
+        `}</style>
       </section>
 
       {/* Featured Products */}
