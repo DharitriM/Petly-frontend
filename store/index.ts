@@ -5,6 +5,7 @@ import searchReducer from './slices/searchSlice';
 import brandReducer from './slices/brandSlice';
 import categoryReducer from './slices/categorySlice';
 import petTypeReducer from './slices/petTypeSlice';
+import helpReducer from './slices/helpSlice';
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         brand: brandReducer,
         category: categoryReducer,
         petType: petTypeReducer,
+        help: helpReducer,
     },
 })
 

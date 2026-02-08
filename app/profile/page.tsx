@@ -13,9 +13,11 @@ import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { Camera, Edit, Save, X, Plus, Trash2, Calendar } from "lucide-react"
 import { supabase } from "@/lib/supabaseClient"
+import Loader from "@/components/ui/loader"
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
@@ -168,10 +170,13 @@ const handleSave = async () => {
         setPreferences(data.preferences);
       }
     }
+    setLoading(false);
   };
 
   fetchUserProfile();
 }, []);
+
+if (loading) return <Loader />;
 
 
   return (

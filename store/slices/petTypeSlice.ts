@@ -4,11 +4,15 @@ import { createSlice } from "@reduxjs/toolkit";
 interface petTypeState {
     petTypes: pet_type[];
     count: number;
+    loading: boolean;
+    error: string | null;
 }
 
 const initialState: petTypeState = {
     petTypes: [],
     count: 0,
+    loading: false,
+    error: null,
 };
 
 const petTypeSlice = createSlice({
@@ -33,8 +37,14 @@ const petTypeSlice = createSlice({
             state.petTypes = state.petTypes.filter((p: any) => p.id !== action.payload);
             state.count -= 1;
         },
+        setLoading: (state, action) => {
+            state.loading = action.payload;
+        },
+        setError: (state, action) => {
+            state.error = action.payload;
+        },
     },
 });
 
-export const { setPetTypes, addPetType, updatePetType, deletePetType } = petTypeSlice.actions;
+export const { setPetTypes, addPetType, updatePetType, deletePetType, setLoading, setError } = petTypeSlice.actions;
 export default petTypeSlice.reducer;

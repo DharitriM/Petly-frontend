@@ -4,11 +4,15 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface BrandState {
     brands: brand[];
     count: number;
+    loading: boolean;
+    error: string | null;
 }
 
 const initialState: BrandState = {
     brands: [],
     count: 0,
+    loading: false,
+    error: null,
 };
 
 const brandSlice = createSlice({
@@ -33,10 +37,16 @@ const brandSlice = createSlice({
             state.brands = state.brands.filter((b: any) => b.id !== action.payload);
             state.count -= 1;
         },
+        setLoading: (state, action: PayloadAction<boolean>) => {
+            state.loading = action.payload;
+        },
+        setError: (state, action: PayloadAction<string | null>) => {
+            state.error = action.payload;
+        },
     },
 });
 
-export const { setBrands, addBrand, updateBrand, deleteBrand } = brandSlice.actions;
+export const { setBrands, addBrand, updateBrand, deleteBrand, setLoading, setError } = brandSlice.actions;
 export default brandSlice.reducer;
 
 export const brandSliceActions = () => ({

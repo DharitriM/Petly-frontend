@@ -20,7 +20,7 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Input } from "../ui/input";
 import { useDispatch } from "react-redux";
 import { setSearchTerm } from "@/store/slices/searchSlice";
@@ -65,7 +65,6 @@ const helpMenu = [
     items: [
       { name: "Emergency Contacts", href: "/help/emergency", icon: "🚨" },
       { name: "24/7 Helpline", href: "/help/helpline", icon: "📞" },
-      { name: "Live Chat", href: "/help/chat", icon: "💬" },
       { name: "FAQ", href: "/help/faq", icon: "❓" },
     ],
   },
@@ -73,6 +72,7 @@ const helpMenu = [
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useDispatch();
 
   const [userData, setUserData] = useState(null);
@@ -80,6 +80,12 @@ export default function Navbar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (pathname?.startsWith("/products")) {
+      setShowSearch(true);
+    }
+  }, [pathname]);
 
   const handleLogout = () => {
     setIsOpen(false);
@@ -162,21 +168,66 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center space-x-8">
               <Link
                 href="/contact"
-                className="text-gray-700 hover:text-purple-600 transition-colors"
+                className={`transition-colors ${
+                  pathname === "/contact"
+                    ? "text-purple-600 font-bold"
+                    : "text-gray-700 hover:text-purple-600"
+                }`}
               >
                 Contact
               </Link>
 
-              <Link
-                href="/products"
-                className="text-gray-700 hover:text-purple-600 transition-colors"
-              >
-                Products
-              </Link>
+              {/* Products Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className={`flex items-center transition-colors ${
+                    pathname?.startsWith("/products")
+                      ? "text-purple-600 font-bold"
+                      : "text-gray-700 hover:text-purple-600"
+                  }`}
+                >
+                  Products <ChevronDown className="ml-1 h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/products"
+                      className="flex items-center font-semibold"
+                    >
+                      All Products
+                    </Link>
+                  </DropdownMenuItem>
+                  {[
+                    { name: "Toys", id: "toy" },
+                    { name: "Bones", id: "bone" },
+                    { name: "Outfits", id: "outfit" },
+                    { name: "Belts", id: "belt" },
+                    { name: "Shoes", id: "shoes" },
+                    { name: "Food", id: "food" },
+                    { name: "Bath Items", id: "bath" },
+                    { name: "Home & Baskets", id: "home" },
+                  ].map((category) => (
+                    <DropdownMenuItem key={category.id} asChild>
+                      <Link
+                        href={`/products?category=${category.id}`}
+                        className="flex items-center pl-4"
+                      >
+                        {category.name}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {/* Services Dropdown */}
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center text-gray-700 hover:text-purple-600 transition-colors">
+                <DropdownMenuTrigger
+                  className={`flex items-center transition-colors ${
+                    pathname?.startsWith("/services")
+                      ? "text-purple-600 font-bold"
+                      : "text-gray-700 hover:text-purple-600"
+                  }`}
+                >
                   Services <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64">
@@ -193,7 +244,13 @@ export default function Navbar() {
 
               {/* Activities Dropdown */}
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center text-gray-700 hover:text-purple-600 transition-colors">
+                <DropdownMenuTrigger
+                  className={`flex items-center transition-colors ${
+                    pathname?.startsWith("/activities")
+                      ? "text-purple-600 font-bold"
+                      : "text-gray-700 hover:text-purple-600"
+                  }`}
+                >
                   Activities <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64">
@@ -210,14 +267,24 @@ export default function Navbar() {
 
               <Link
                 href="/settings"
-                className="text-gray-700 hover:text-purple-600 transition-colors"
+                className={`transition-colors ${
+                  pathname === "/settings"
+                    ? "text-purple-600 font-bold"
+                    : "text-gray-700 hover:text-purple-600"
+                }`}
               >
                 Settings
               </Link>
 
               {/* Help Dropdown */}
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center text-gray-700 hover:text-purple-600 transition-colors">
+                <DropdownMenuTrigger
+                  className={`flex items-center transition-colors ${
+                    pathname?.startsWith("/help")
+                      ? "text-purple-600 font-bold"
+                      : "text-gray-700 hover:text-purple-600"
+                  }`}
+                >
                   Help <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64">
@@ -295,12 +362,16 @@ export default function Navbar() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/orders">Orders</Link>
-                  </DropdownMenuItem>
+                  {userData && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/profile">Profile</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/orders">Orders</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuItem
                     onClick={() =>
                       userData ? handleLogout() : router.push("/auth/login")

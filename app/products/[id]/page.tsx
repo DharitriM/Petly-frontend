@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,47 +27,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
+import Loader from "@/components/ui/loader";
 import { Product } from "@/lib/interfaces/product";
 import { useDispatch } from "react-redux";
-
-// Mock product data - in real app, this would come from API
-// const product = {
-//   id: 1,
-//   name: "Premium Dog Toy Set",
-//   price: 29.99,
-//   originalPrice: 39.99,
-//   rating: 4.8,
-//   reviews: 124,
-//   description:
-//     "A complete set of premium dog toys designed to keep your furry friend entertained for hours. Made from safe, non-toxic materials that are durable and long-lasting.",
-//   features: [
-//     "Made from 100% safe, non-toxic materials",
-//     "Durable construction for long-lasting play",
-//     "Variety of textures and sounds to engage your pet",
-//     "Easy to clean and maintain",
-//     "Suitable for dogs of all sizes",
-//   ],
-//   specifications: {
-//     Material: "Natural Rubber & Cotton",
-//     Size: "Mixed sizes (Small to Large)",
-//     Weight: "1.2 lbs",
-//     Color: "Assorted Colors",
-//     "Age Range": "All Ages",
-//     Brand: "PetPlay",
-//   },
-//   images: [
-//     "/placeholder.svg?height=500&width=500",
-//     "/placeholder.svg?height=500&width=500",
-//     "/placeholder.svg?height=500&width=500",
-//     "/placeholder.svg?height=500&width=500",
-//   ],
-//   category: "toys",
-//   petType: "dog",
-//   brand: "PetPlay",
-//   inStock: true,
-//   stockCount: 15,
-//   badge: "Best Seller",
-// }
 
 const relatedProducts = [
   {
@@ -99,17 +61,21 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("");
   const [product, setProduct] = useState<Product>({} as Product);
+  const [loading, setLoading] = useState(true);
   const { id } = useParams();
 
   // Fetch product data based on ID
   async function fetchProduct() {
     try {
+      setLoading(true);
       const res = await fetch("/api/products/" + id);
       const data = await res.json();
       if (data) setProduct(data);
     } catch (err: any) {
       console.error("Error fetching products:", err);
       toast.error("Error fetching products", err.message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -137,6 +103,8 @@ export default function ProductDetailPage() {
   }, [id]);
 
   console.log({ product });
+
+  if (loading) return <Loader />;
 
   return (
     <div className="container mx-auto px-4 py-8">

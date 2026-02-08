@@ -4,11 +4,15 @@ import { User } from '@/lib/interfaces/user';
 interface UserState {
   users: User[];
   count: number;
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: UserState = {
   users: [],
   count: 0,
+  loading: false,
+  error: null,
 };
 
 const userSlice = createSlice({
@@ -33,8 +37,14 @@ const userSlice = createSlice({
       state.users = state.users.filter((u) => u.id !== action.payload);
       state.count -= 1;
     },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
+    },
   },
 });
 
-export const { setUsers, addUser, updateUser, deleteUser } = userSlice.actions;
+export const { setUsers, addUser, updateUser, deleteUser, setLoading, setError } = userSlice.actions;
 export default userSlice.reducer;

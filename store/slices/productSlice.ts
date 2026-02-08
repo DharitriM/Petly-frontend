@@ -4,11 +4,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface ProductState {
   products: Product[];
   count: number;
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: ProductState = {
   products: [],
   count: 0,
+  loading: false,
+  error: null,
 };
 
 const productSlice = createSlice({
@@ -33,8 +37,14 @@ const productSlice = createSlice({
       state.products = state.products.filter((p: any) => p.id !== action.payload);
       state.count -= 1;
     },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
+    },
   },
 });
 
-export const { setProducts, addProduct, updateProduct, deleteProduct } = productSlice.actions;
+export const { setProducts, addProduct, updateProduct, deleteProduct, setLoading, setError } = productSlice.actions;
 export default productSlice.reducer;

@@ -18,6 +18,7 @@ import Link from "next/link";
 import { RootState } from "@/store";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBrands, fetchCategories, fetchPetTypes, fetchProducts } from "@/lib/apiUtils";
+import Loader from "@/components/ui/loader";
 
 
 export default function ProductsPage() {
@@ -28,7 +29,7 @@ export default function ProductsPage() {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("featured");
   const [showFilters, setShowFilters] = useState(false);
-  const {products, count: productCount} = useSelector((state: RootState) => state.product);
+  const {products, count: productCount, loading} = useSelector((state: RootState) => state.product);
   const {petTypes, count: petTypeCount} = useSelector((state: RootState) => state.petType);
   const {categories, count: categoryCount} = useSelector((state: RootState) => state.category);
   const {brands, count: brandCount} = useSelector((state: RootState) => state.brand);
@@ -78,6 +79,10 @@ export default function ProductsPage() {
       setSelectedBrands(selectedBrands.filter((id) => id !== brandId));
     }
   };
+
+
+
+  if (loading) return <Loader />;
 
   return (
     <div className="container mx-auto px-4 py-8">
