@@ -29,40 +29,25 @@ import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import Loader from "@/components/ui/loader";
 import { Product } from "@/lib/interfaces/product";
-import { useDispatch } from "react-redux";
-
-const relatedProducts = [
-  {
-    id: 2,
-    name: "Interactive Puzzle Toy",
-    price: 19.99,
-    image: "/placeholder.svg?height=200&width=200",
-    rating: 4.6,
-  },
-  {
-    id: 3,
-    name: "Rope Chew Toy",
-    price: 12.99,
-    image: "/placeholder.svg?height=200&width=200",
-    rating: 4.5,
-  },
-  {
-    id: 4,
-    name: "Squeaky Ball Set",
-    price: 15.99,
-    image: "/placeholder.svg?height=200&width=200",
-    rating: 4.7,
-  },
-];
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { addToCart } from "@/store/slices/cartSlice";
+import { addToWishlist } from "@/store/slices/wishlistSlice";
 
 export default function ProductDetailPage() {
   const dispatch = useDispatch()
+  const { products } = useSelector((state: RootState) => state.product)
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("");
   const [product, setProduct] = useState<Product>({} as Product);
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
+
+  const relatedProducts = products
+    .filter((p) => p.id !== id && (p.category?.id === product.category?.id || p.brand?.id === product.brand?.id))
+    .slice(0, 3);
+
 
   // Fetch product data based on ID
   async function fetchProduct() {
@@ -80,17 +65,13 @@ export default function ProductDetailPage() {
   }
 
   const handleAddToCart = () => {
-    // Add to cart logic
-    console.log("Added to cart:", {
-      productId: product.id,
-      quantity,
-      size: selectedSize,
-    });
+    dispatch(addToCart({ product, quantity, size: selectedSize }));
+    toast.success("Added to cart");
   };
 
   const handleAddToWishlist = () => {
-    // Add to wishlist logic
-    console.log("Added to wishlist:", product.id);
+    dispatch(addToWishlist(product));
+    toast.success("Added to wishlist");
   };
 
   const handleBuyNow = () => {
@@ -310,22 +291,36 @@ export default function ProductDetailPage() {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="description">Description</TabsTrigger>
           <TabsTrigger value="specifications">Specifications</TabsTrigger>
-          {/* <TabsTrigger value="reviews">Reviews ({product.reviews})</TabsTrigger> */}
+          <TabsTrigger value="reviews">Reviews ({product.reviews_count || 2})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="description" className="mt-6">
           <Card>
-            {/* <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Product Features</h3>
-              <ul className="space-y-2">
-                {product.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-2">
+             <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Product Description</h3>
+              <p className="text-gray-600 whitespace-pre-line leading-relaxed mb-6">
+                {product.description || "No description available for this product."}
+              </p>
+              <h3 className="text-lg font-semibold mb-4">Key Features</h3>
+              <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-start gap-2">
                     <span className="text-green-500 mt-1">✓</span>
-                    <span>{feature}</span>
+                    <span>High quality material safe for pets</span>
                   </li>
-                ))}
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Durable and long-lasting design</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Easy to clean and maintain</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Perfect for {product.pet_type?.name || "all pets"}</span>
+                  </li>
               </ul>
-            </CardContent> */}
+            </CardContent> 
           </Card>
         </TabsContent>
 
@@ -335,14 +330,28 @@ export default function ProductDetailPage() {
               <h3 className="text-lg font-semibold mb-4">
                 Product Specifications
               </h3>
-              {/* <div className="grid md:grid-cols-2 gap-4">
-                {Object.entries(product.specifications).map(([key, value]) => (
-                  <div key={key} className="flex justify-between py-2 border-b">
-                    <span className="font-medium">{key}:</span>
-                    <span className="text-gray-600">{value}</span>
+              <div className="grid md:grid-cols-2 gap-4">
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="font-medium">Brand:</span>
+                    <span className="text-gray-600">{product.brand?.name || "N/A"}</span>
                   </div>
-                ))}
-              </div> */}
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="font-medium">Category:</span>
+                    <span className="text-gray-600">{product.category?.name || "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="font-medium">Pet Type:</span>
+                    <span className="text-gray-600">{product.pet_type?.name || "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="font-medium">Weight:</span>
+                    <span className="text-gray-600">{product.weight ? `${product.weight} kg` : "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="font-medium">Dimensions:</span>
+                    <span className="text-gray-600">{product.dimensions || "N/A"}</span>
+                  </div>
+              </div> 
             </CardContent>
           </Card>
         </TabsContent>
@@ -370,7 +379,7 @@ export default function ProductDetailPage() {
                   </div>
                   <p className="text-gray-600">
                     {
-                      "My dog absolutely loves these toys! Great quality and very durable. Highly recommended!"
+                      "My pet absolutely loves this! Great quality and very durable. Highly recommended!"
                     }
                   </p>
                 </div>
@@ -392,7 +401,7 @@ export default function ProductDetailPage() {
                   </div>
                   <p className="text-gray-600">
                     {
-                      "Good value for money. The toys are well-made and my pets enjoy them."
+                      "Good value for money. The product is well-made and my pets enjoy it."
                     }
                   </p>
                 </div>
@@ -413,7 +422,7 @@ export default function ProductDetailPage() {
               <div className="relative overflow-hidden">
                 <Link href={`/products/${relatedProduct.id}`}>
                   <Image
-                    src={relatedProduct.image || "/placeholder.svg"}
+                    src={relatedProduct.images?.[0] || "/placeholder.svg"}
                     alt={relatedProduct.name}
                     width={200}
                     height={200}
@@ -448,7 +457,10 @@ export default function ProductDetailPage() {
                   <span className="text-lg font-bold text-green-600">
                     ₹{relatedProduct.price}
                   </span>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={() => {
+                    dispatch(addToCart({ product: relatedProduct, quantity: 1 }));
+                    toast.success("Added to cart");
+                  }}>
                     <ShoppingCart className="w-4 h-4" />
                   </Button>
                 </div>

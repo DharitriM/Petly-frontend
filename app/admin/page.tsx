@@ -13,7 +13,9 @@ import {
   Blocks,
   SwatchBook,
   PawPrint,
+  Activity
 } from "lucide-react";
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from "recharts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -27,32 +29,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const recentOrders = [
-    {
-      id: "ORD-001",
-      customer: "John Doe",
-      amount: "₹89.99",
-      status: "Delivered",
-    },
-    {
-      id: "ORD-002",
-      customer: "Jane Smith",
-      amount: "₹45.50",
-      status: "Processing",
-    },
-    {
-      id: "ORD-003",
-      customer: "Bob Johnson",
-      amount: "₹125.75",
-      status: "Shipped",
-    },
-    {
-      id: "ORD-004",
-      customer: "Alice Williams",
-      amount: "₹79.25",
-      status: "Pending",
-    },
-  ];
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
 
   const { users, count: userCount } = useSelector((state: RootState) => state.user);
   const { count: productCount } = useSelector((state: RootState) => state.product);
@@ -61,6 +38,16 @@ export default function AdminDashboard() {
   const { count: petTypeCount } = useSelector((state: RootState) => state.petType);
   const [recentUsers, setRecentUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const buyAnalysisData = [
+    { name: "Jan", sales: 4000, revenue: 2400 },
+    { name: "Feb", sales: 3000, revenue: 1398 },
+    { name: "Mar", sales: 2000, revenue: 9800 },
+    { name: "Apr", sales: 2780, revenue: 3908 },
+    { name: "May", sales: 1890, revenue: 4800 },
+    { name: "Jun", sales: 2390, revenue: 3800 },
+    { name: "Jul", sales: 3490, revenue: 4300 },
+  ];
 
   const stats = [
     {
@@ -119,6 +106,19 @@ export default function AdminDashboard() {
     fetchCategories(dispatch);
     fetchBrands(dispatch);
     fetchPetTypes(dispatch);
+
+    async function getOrders() {
+      try {
+        const res = await fetch("/api/orders");
+        const data = await res.json();
+        if (data.orders) {
+          setRecentOrders(data.orders.slice(0, 5));
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    }
+    getOrders();
   }, [dispatch]);
 
   useEffect(() => {
@@ -216,6 +216,34 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      {/* Analytics Chart */}
+      <div className="mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-purple-600" />
+              Products Buy Analysis
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={buyAnalysisData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} />
+                  <RechartsTooltip 
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Bar dataKey="sales" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Products Sold" />
+                  <Bar dataKey="revenue" fill="#10b981" radius={[4, 4, 0, 0]} name="Revenue (₹)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Orders */}
         <Card>
@@ -230,23 +258,27 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                >
-                  <div>
-                    <p className="font-medium">{order.id}</p>
-                    <p className="text-sm text-gray-600">{order.customer}</p>
+              {recentOrders.length > 0 ? (
+                recentOrders.map((order) => (
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div>
+                      <p className="font-medium">{order.id}</p>
+                      <p className="text-sm text-gray-600">{order.customer || order.user_id || "Guest"}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">₹{(order.total || 0).toFixed(2)}</p>
+                      <Badge className={getStatusColor(order.status)}>
+                        {order.status || "Pending"}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">{order.amount}</p>
-                    <Badge className={getStatusColor(order.status)}>
-                      {order.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="text-center py-4 text-gray-500">No recent orders found</div>
+              )}
             </div>
           </CardContent>
         </Card>

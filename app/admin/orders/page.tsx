@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,55 +10,36 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Eye } from "lucide-react"
 
-const initialOrders = [
-  {
-    id: "ORD-001",
-    customer: "John Doe",
-    email: "john@example.com",
-    date: "2024-01-15",
-    status: "Delivered",
-    total: 89.99,
-    items: 3,
-  },
-  {
-    id: "ORD-002",
-    customer: "Jane Smith",
-    email: "jane@example.com",
-    date: "2024-01-14",
-    status: "Processing",
-    total: 45.5,
-    items: 2,
-  },
-  {
-    id: "ORD-003",
-    customer: "Bob Johnson",
-    email: "bob@example.com",
-    date: "2024-01-13",
-    status: "Shipped",
-    total: 125.75,
-    items: 4,
-  },
-  {
-    id: "ORD-004",
-    customer: "Alice Brown",
-    email: "alice@example.com",
-    date: "2024-01-12",
-    status: "Pending",
-    total: 67.25,
-    items: 3,
-  },
-]
-
 export default function OrdersPage() {
-  const [orders, setOrders] = useState(initialOrders)
+  const [orders, setOrders] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchOrders() {
+      try {
+        const res = await fetch("/api/orders")
+        const data = await res.json()
+        if (data.orders) {
+          setOrders(data.orders)
+        }
+      } catch (e) {
+        console.error("Failed to fetch orders", e)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchOrders()
+  }, [])
 
   const filteredOrders = orders.filter((order) => {
+    const orderIdStr = order.id ? order.id.toString().toLowerCase() : ""
+    const customerStr = order.customer ? order.customer.toLowerCase() : ""
     const matchesSearch =
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchTerm.toLowerCase())
+      orderIdStr.includes(searchTerm.toLowerCase()) ||
+      customerStr.includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === "all" || order.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -81,6 +62,8 @@ export default function OrdersPage() {
   const updateOrderStatus = (orderId: string, newStatus: string) => {
     setOrders(orders.map((order) => (order.id === orderId ? { ...order, status: newStatus } : order)))
   }
+
+  if (loading) return <div className="p-6">Loading orders...</div>
 
   return (
     <div className="p-6">
@@ -135,16 +118,16 @@ export default function OrdersPage() {
                     <td className="py-3 px-4 font-medium">{order.id}</td>
                     <td className="py-3 px-4">
                       <div>
-                        <p className="font-medium">{order.customer}</p>
-                        <p className="text-sm text-gray-500">{order.email}</p>
+                        <p className="font-medium">{order.customer || order.user_id || "Guest"}</p>
+                        <p className="text-sm text-gray-500">{order.email || ""}</p>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-gray-600">{order.date}</td>
+                    <td className="py-3 px-4 text-gray-600">{order.date || new Date(order.created_at).toLocaleDateString()}</td>
                     <td className="py-3 px-4">
                       <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
                     </td>
-                    <td className="py-3 px-4">{order.items}</td>
-                    <td className="py-3 px-4 font-medium">₹{order.total.toFixed(2)}</td>
+                    <td className="py-3 px-4">{order.items || order.total_items || 0}</td>
+                    <td className="py-3 px-4 font-medium">₹{(order.total || 0).toFixed(2)}</td>
                     <td className="py-3 px-4 text-right">
                       <Dialog>
                         <DialogTrigger asChild>

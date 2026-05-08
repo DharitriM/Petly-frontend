@@ -8,54 +8,28 @@ import { Separator } from "@/components/ui/separator"
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-
-const initialCartItems = [
-  {
-    id: 1,
-    name: "Premium Dog Toy Set",
-    price: 29.99,
-    quantity: 2,
-    image: "/placeholder.svg?height=100&width=100",
-    size: "Medium",
-    inStock: true,
-  },
-  {
-    id: 2,
-    name: "Cozy Cat Bed",
-    price: 49.99,
-    quantity: 1,
-    image: "/placeholder.svg?height=100&width=100",
-    size: "Large",
-    inStock: true,
-  },
-  {
-    id: 3,
-    name: "Organic Dog Food",
-    price: 24.99,
-    quantity: 1,
-    image: "/placeholder.svg?height=100&width=100",
-    size: "5kg",
-    inStock: false,
-  },
-]
+import { useDispatch, useSelector } from "react-redux"
+import { RootState } from "@/store"
+import { removeFromCart, updateQuantity } from "@/store/slices/cartSlice"
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(initialCartItems)
+  const dispatch = useDispatch()
+  const cartItems = useSelector((state: RootState) => state.cart.items)
   const [promoCode, setPromoCode] = useState("")
 
-  const updateQuantity = (id: number, newQuantity: number) => {
+  const handleUpdateQuantity = (id: string, newQuantity: number) => {
     if (newQuantity === 0) {
-      removeItem(id)
+      handleRemoveItem(id)
       return
     }
-    setCartItems((items) => items.map((item) => (item.id === id ? { ...item, quantity: newQuantity } : item)))
+    dispatch(updateQuantity({ id, quantity: newQuantity }))
   }
 
-  const removeItem = (id: number) => {
-    setCartItems((items) => items.filter((item) => item.id !== id))
+  const handleRemoveItem = (id: string) => {
+    dispatch(removeFromCart(id))
   }
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.cartQuantity, 0)
   const shipping = subtotal > 50 ? 0 : 9.99
   const tax = subtotal * 0.08
   const total = subtotal + shipping + tax
@@ -99,13 +73,13 @@ export default function CartPage() {
                 <div className="flex gap-4">
                   <div className="relative">
                     <Image
-                      src={item.image || "/placeholder.svg"}
+                      src={item.images?.[0] || "/placeholder.svg"}
                       alt={item.name}
                       width={100}
                       height={100}
                       className="w-24 h-24 object-cover rounded-lg"
                     />
-                    {!item.inStock && (
+                    {!item.in_stock && (
                       <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
                         <span className="text-white text-xs font-medium">Out of Stock</span>
                       </div>
@@ -116,13 +90,13 @@ export default function CartPage() {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className="font-semibold text-lg">{item.name}</h3>
-                        <p className="text-gray-600">Size: {item.size}</p>
-                        {!item.inStock && <p className="text-red-600 text-sm font-medium">Currently out of stock</p>}
+                        <p className="text-gray-600">Size: {item.selectedSize || "Standard"}</p>
+                        {!item.in_stock && <p className="text-red-600 text-sm font-medium">Currently out of stock</p>}
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => handleRemoveItem(item.id)}
                         className="text-red-600 hover:text-red-700"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -134,24 +108,24 @@ export default function CartPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          disabled={item.quantity <= 1}
+                          onClick={() => handleUpdateQuantity(item.id, item.cartQuantity - 1)}
+                          disabled={item.cartQuantity <= 1}
                         >
                           <Minus className="w-4 h-4" />
                         </Button>
-                        <span className="w-12 text-center font-medium">{item.quantity}</span>
+                        <span className="w-12 text-center font-medium">{item.cartQuantity}</span>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          disabled={!item.inStock}
+                          onClick={() => handleUpdateQuantity(item.id, item.cartQuantity + 1)}
+                          disabled={!item.in_stock}
                         >
                           <Plus className="w-4 h-4" />
                         </Button>
                       </div>
 
                       <div className="text-right">
-                        <p className="text-lg font-bold">₹{(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-lg font-bold">₹{(item.price * item.cartQuantity).toFixed(2)}</p>
                         <p className="text-sm text-gray-500">₹{item.price.toFixed(2)} each</p>
                       </div>
                     </div>
@@ -206,12 +180,12 @@ export default function CartPage() {
                 className="w-full"
                 size="lg"
                 onClick={handleCheckout}
-                disabled={cartItems.some((item) => !item.inStock)}
+                disabled={cartItems.some((item) => !item.in_stock)}
               >
                 Proceed to Checkout
               </Button>
 
-              {cartItems.some((item) => !item.inStock) && (
+              {cartItems.some((item) => !item.in_stock) && (
                 <p className="text-sm text-red-600 mt-2 text-center">Remove out of stock items to continue</p>
               )}
 

@@ -6,6 +6,8 @@ import brandReducer from './slices/brandSlice';
 import categoryReducer from './slices/categorySlice';
 import petTypeReducer from './slices/petTypeSlice';
 import helpReducer from './slices/helpSlice';
+import cartReducer from './slices/cartSlice';
+import wishlistReducer from './slices/wishlistSlice';
 
 export const store = configureStore({
     reducer: {
@@ -16,6 +18,8 @@ export const store = configureStore({
         category: categoryReducer,
         petType: petTypeReducer,
         help: helpReducer,
+        cart: cartReducer,
+        wishlist: wishlistReducer,
     },
 })
 

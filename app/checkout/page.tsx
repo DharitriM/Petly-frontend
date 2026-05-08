@@ -12,25 +12,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { CreditCard, Truck, MapPin, ArrowLeft, Lock } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-
-const cartItems = [
-  {
-    id: 1,
-    name: "Premium Dog Toy Set",
-    price: 29.99,
-    quantity: 2,
-    image: "/placeholder.svg?height=80&width=80",
-  },
-  {
-    id: 2,
-    name: "Cozy Cat Bed",
-    price: 49.99,
-    quantity: 1,
-    image: "/placeholder.svg?height=80&width=80",
-  },
-]
+import { useSelector } from "react-redux"
+import { RootState } from "@/store"
 
 export default function CheckoutPage() {
+  const cartItems = useSelector((state: RootState) => state.cart.items)
   const [currentStep, setCurrentStep] = useState(1)
   const [shippingInfo, setShippingInfo] = useState({
     firstName: "",
@@ -51,8 +37,8 @@ export default function CheckoutPage() {
     cardholderName: "",
   })
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const shipping = 9.99
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.cartQuantity, 0)
+  const shipping = subtotal > 50 ? 0 : 9.99
   const tax = subtotal * 0.08
   const total = subtotal + shipping + tax
 
@@ -344,7 +330,7 @@ export default function CheckoutPage() {
               {cartItems.map((item) => (
                 <div key={item.id} className="flex gap-3">
                   <Image
-                    src={item.image || "/placeholder.svg"}
+                    src={item.images?.[0] || "/placeholder.svg"}
                     alt={item.name}
                     width={80}
                     height={80}
@@ -352,8 +338,8 @@ export default function CheckoutPage() {
                   />
                   <div className="flex-1">
                     <h4 className="font-medium text-sm">{item.name}</h4>
-                    <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                    <p className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="text-sm text-gray-500">Qty: {item.cartQuantity}</p>
+                    <p className="font-medium">₹{(item.price * item.cartQuantity).toFixed(2)}</p>
                   </div>
                 </div>
               ))}
