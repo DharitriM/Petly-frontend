@@ -166,19 +166,8 @@ export default function Navbar() {
               </span>
             </Link>
             <div className="hidden lg:flex items-center space-x-8">
-              <Link
-                href="/contact"
-                className={`transition-colors ${
-                  pathname === "/contact"
-                    ? "text-purple-600 font-bold"
-                    : "text-gray-700 hover:text-purple-600"
-                }`}
-              >
-                Contact
-              </Link>
-
               {/* Products Dropdown */}
-              <DropdownMenu>
+              {/* <DropdownMenu>
                 <DropdownMenuTrigger
                   className={`flex items-center transition-colors ${
                     pathname?.startsWith("/products")
@@ -217,7 +206,18 @@ export default function Navbar() {
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
-              </DropdownMenu>
+              </DropdownMenu> */}
+        
+              <Link
+                href="/products"
+                className={`transition-colors ${
+                  pathname === "/products"
+                    ? "text-purple-600 font-bold"
+                    : "text-gray-700 hover:text-purple-600"
+                }`}
+              >
+                Products
+              </Link>              
 
               {/* Services Dropdown */}
               <DropdownMenu>
@@ -265,17 +265,6 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Link
-                href="/settings"
-                className={`transition-colors ${
-                  pathname === "/settings"
-                    ? "text-purple-600 font-bold"
-                    : "text-gray-700 hover:text-purple-600"
-                }`}
-              >
-                Settings
-              </Link>
-
               {/* Help Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger
@@ -298,6 +287,28 @@ export default function Navbar() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              <Link
+                href="/settings"
+                className={`transition-colors ${
+                  pathname === "/settings"
+                    ? "text-purple-600 font-bold"
+                    : "text-gray-700 hover:text-purple-600"
+                }`}
+              >
+                Settings
+              </Link>
+              
+              <Link
+                href="/contact"
+                className={`transition-colors ${
+                  pathname === "/contact"
+                    ? "text-purple-600 font-bold"
+                    : "text-gray-700 hover:text-purple-600"
+                }`}
+              >
+                Contact
+              </Link>
             </div>
 
             {/* Right Side Icons */}
@@ -393,9 +404,6 @@ export default function Navbar() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-80">
                   <div className="flex flex-col space-y-4 mt-8">
-                    <Link href="/contact" className="text-lg font-medium">
-                      Contact
-                    </Link>
                     <Link href="/products" className="text-lg font-medium">
                       Products
                     </Link>
@@ -426,10 +434,6 @@ export default function Navbar() {
                       ))}
                     </div>
 
-                    <Link href="/settings" className="text-lg font-medium">
-                      Settings
-                    </Link>
-
                     <div className="space-y-2">
                       <h3 className="text-lg font-medium">Help</h3>
                       {helpMenu[0].items.map((item) => (
@@ -442,6 +446,14 @@ export default function Navbar() {
                         </Link>
                       ))}
                     </div>
+
+                    <Link href="/settings" className="text-lg font-medium">
+                      Settings
+                    </Link>
+
+                    <Link href="/contact" className="text-lg font-medium">
+                      Contact
+                    </Link>
                   </div>
                 </SheetContent>
               </Sheet>

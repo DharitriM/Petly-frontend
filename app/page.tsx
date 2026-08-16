@@ -113,7 +113,7 @@ export default function HomePage() {
               <Badge className="p-2 align-middle font-mono text-xl bg-white/20 text-white border-white/30 hover:bg-pink-200 hover:text-purple-800 border-2">
                 🐾Welcome to PetLy
               </Badge>
-              <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+              <h1 className="text-5xl lg:text-6xl font-bold">
                 Everything Your Pet Needs, All in One Place
               </h1>
               <p className="text-xl opacity-90">
