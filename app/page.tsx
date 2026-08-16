@@ -154,11 +154,12 @@ export default function HomePage() {
               <Image
                 // src="/hero.jpg?height=600&width=600"
                 // src="/heroBlueBg.jpg?height=600&width=600"
-                src="/1.jpg?height=600&width=600"
+                src="/1.jpg"
                 alt="Happy pets"
                 width={600}
                 height={600}
-                className="rounded-2xl shadow-2xl"
+                priority
+                className="rounded-2xl shadow-2xl w-full h-auto"
               />
               <div className="absolute -top-2 -right-0 bg-pink-500 text-white p-4 rounded-full animate-bounce">
                 <span className="text-2xl">🐕</span>

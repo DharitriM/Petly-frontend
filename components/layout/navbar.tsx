@@ -110,10 +110,10 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b shadow-sm">
+    <nav className="sticky top-0 z-50 h-16 bg-purple-100 border-b shadow-sm flex">
       {isAdmin ? (
         <div className="container max-w-[3000px] px-8">
-          <div className="flex items-center justify-between h-[7.8vh]">
+          <div className="flex h-full items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-gradient-to-r from-indigo-300 to-pink-300 rounded-full flex items-center justify-center">
                 <span className="font-bold text-lg">🐾</span>
@@ -137,7 +137,7 @@ export default function Navbar() {
                 >
                   <DropdownMenuItem
                     asChild
-                    className="justify-center w-full cursor-pointer hover:bg-gray-100"
+                    className="justify-center w-full cursor-pointer hover:bg-purple-200"
                   >
                     <button onClick={() => router.push("/admin/profile")}>
                       Profile
@@ -145,7 +145,7 @@ export default function Navbar() {
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     asChild
-                    className="justify-center w-full cursor-pointer hover:bg-gray-100"
+                    className="justify-center w-full cursor-pointer hover:bg-purple-200"
                   >
                     <button onClick={handleLogout}>Logout</button>
                   </DropdownMenuItem>
@@ -156,7 +156,7 @@ export default function Navbar() {
         </div>
       ) : (
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-[7.8vh]">
+          <div className="flex h-full items-center justify-between">
             <Link href="/" className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                 <span className="font-bold text-lg">🐾</span>
@@ -307,7 +307,7 @@ export default function Navbar() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="hidden md:flex"
+                    className="hidden md:flex hover:bg-purple-200"
                     onClick={() => setShowSearch(true)}
                   >
                     <Search className="h-4 w-4" />
@@ -326,6 +326,7 @@ export default function Navbar() {
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="hover:bg-purple-200"
                       onClick={() => setShowSearch(false)}
                     >
                       <X className="h-4 w-4" />
@@ -357,7 +358,7 @@ export default function Navbar() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="hover:bg-purple-200">
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
